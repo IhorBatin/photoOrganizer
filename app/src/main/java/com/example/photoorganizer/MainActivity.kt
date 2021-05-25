@@ -21,6 +21,7 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     lateinit var bundledMainActivity: ActivityMainBinding
+    lateinit var fileUtil: FileUtil
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +31,10 @@ class MainActivity : AppCompatActivity() {
         Timber.plant(Timber.DebugTree())
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
 
+        fileUtil = FileUtil(this, applicationContext)
+
         val btn: Button = findViewById(R.id.btnTest)
         btn.setOnClickListener {
-            val fileUtil: FileUtil = FileUtil(this, applicationContext)
             fileUtil.dispatchTakePictureIntent()
         }
 
@@ -43,9 +45,17 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         val storageDir: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val absPath = storageDir?.absolutePath
         val isDir = storageDir?.isDirectory.toString()
-        Timber.tag(DEBUG_TAG).d("File $absPath is dir=$isDir ")
+
+        Timber.tag(DEBUG_TAG).d("File: ${storageDir?.absolutePath} is dir=$isDir ")
+        val files =  storageDir?.listFiles()
+        Timber.tag(DEBUG_TAG).d("${files?.size ?: -1}")
+
+        files?.forEach { file ->
+            Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
+            Timber.tag(DEBUG_TAG).d("File: ${file.name} space= ${file.totalSpace}")
+            fileUtil.setImageFromPath(file.absolutePath, bundledMainActivity.ivTestImage)
+        }
     }
 
     /**
