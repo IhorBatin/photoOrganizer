@@ -16,8 +16,11 @@ import com.example.photoorganizer.utils.REQUEST_IMAGE_CAPTURE
 import timber.log.Timber
 import java.io.File
 
-// TODO: Guide-> https://developer.android.com/training/camera/photobasics
+// Guide-> https://developer.android.com/training/camera/photobasics
 // https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media
+
+// TODO: Add RecyclerView to display all pics.
+// TODO: Figure out why/what files are being generated when pic is not taken...
 
 class MainActivity : AppCompatActivity() {
     lateinit var bundledMainActivity: ActivityMainBinding
@@ -37,8 +40,6 @@ class MainActivity : AppCompatActivity() {
         btn.setOnClickListener {
             fileUtil.dispatchTakePictureIntent()
         }
-
-
     }
 
     override fun onStart() {
