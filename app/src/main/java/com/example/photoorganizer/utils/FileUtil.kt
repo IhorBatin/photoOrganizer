@@ -71,7 +71,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
     }
 
     fun setImageFromPath(imgFile: String, imageView: ImageView) {
-        val myBitmap = BitmapFactory.decodeFile(imgFile)
-        imageView.setImageBitmap(myBitmap)
+        val pictureBitmap = BitmapFactory.decodeFile(imgFile)
+        imageView.setImageBitmap(pictureBitmap)
     }
 }

@@ -9,6 +9,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.RecyclerView
+import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
 import com.example.photoorganizer.utils.DEBUG_TAG
 import com.example.photoorganizer.utils.FileUtil
@@ -25,6 +27,7 @@ import java.io.File
 class MainActivity : AppCompatActivity() {
     lateinit var bundledMainActivity: ActivityMainBinding
     lateinit var fileUtil: FileUtil
+    lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
 
         fileUtil = FileUtil(this, applicationContext)
+        recyclerView = bundledMainActivity.rvImagesRecycler
 
         val btn: Button = findViewById(R.id.btnTest)
         btn.setOnClickListener {
@@ -52,10 +56,16 @@ class MainActivity : AppCompatActivity() {
         val files =  storageDir?.listFiles()
         Timber.tag(DEBUG_TAG).d("${files?.size ?: -1}")
 
+        val rvAdapter = CustomImageAdapter(files as Array<File>)
+        recyclerView.adapter = rvAdapter
+
+
         files?.forEach { file ->
             Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
-            Timber.tag(DEBUG_TAG).d("File: ${file.name} space= ${file.totalSpace}")
-            fileUtil.setImageFromPath(file.absolutePath, bundledMainActivity.ivTestImage)
+            Timber.tag(DEBUG_TAG).d("File: ${file.name} parent= ${file.parentFile}")
+            //file.delete()
+
+            //fileUtil.setImageFromPath(file.absolutePath, bundledMainActivity.ivTestImage)
         }
     }
 
