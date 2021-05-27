@@ -1,11 +1,15 @@
 package com.example.photoorganizer.adapters
 
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
 import java.io.File
 
@@ -18,7 +22,7 @@ class CustomImageAdapter(private val pictureDirectory: Array<File>) : RecyclerVi
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        holder.setImageFromPath(pictureDirectory[position].absolutePath)
+        holder.setImageFromPath(pictureDirectory[position].toUri())
     }
 
     override fun getItemCount(): Int {
@@ -29,9 +33,20 @@ class CustomImageAdapter(private val pictureDirectory: Array<File>) : RecyclerVi
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val image: ImageView = itemView.findViewById(R.id.ivImageHolder)
 
-        fun setImageFromPath(imgFile: String) {
-            val pictureBitmap = BitmapFactory.decodeFile(imgFile)
-            image.setImageBitmap(pictureBitmap)
+        /** Uri seems to be better format to use than bitmap, at-least for now. */
+        fun setImageFromPath(imgFile: Uri) {
+            //val pictureBitmap = BitmapFactory.decodeFile(imgFile)
+            //image.setImageBitmap(pictureBitmap)
+
+            Glide
+                .with(image.context)
+                .load(imgFile)
+                .centerCrop()
+                .into(image)
+            //image.setImageURI(imgFile)
+            image.setOnClickListener {
+                Toast.makeText(image.context, "Clicked: $imgFile", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

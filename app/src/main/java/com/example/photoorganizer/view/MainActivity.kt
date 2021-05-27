@@ -1,33 +1,37 @@
-package com.example.photoorganizer
+package com.example.photoorganizer.view
 
 import android.content.Intent
-import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.view.View
 import android.widget.Button
-import android.widget.ImageView
-import androidx.databinding.DataBindingUtil
+import androidx.activity.viewModels
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
 import com.example.photoorganizer.utils.DEBUG_TAG
 import com.example.photoorganizer.utils.FileUtil
 import com.example.photoorganizer.utils.REQUEST_IMAGE_CAPTURE
+import com.example.photoorganizer.viewmodel.ImagesViewModel
 import timber.log.Timber
 import java.io.File
 
 // Guide-> https://developer.android.com/training/camera/photobasics
 // https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media
 
-// TODO: Add RecyclerView to display all pics.
-// TODO: Figure out why/what files are being generated when pic is not taken...
+// TODO: Add way of creating new folders by user
+// TODO: Implement logic do distinguish images from folders and apply default picture for folder.
+// TODO: Implement functionality to add pictures from gallery. --> https://stackoverflow.com/questions/5309190/android-pick-images-from-gallery
 
 class MainActivity : AppCompatActivity() {
     lateinit var bundledMainActivity: ActivityMainBinding
-    lateinit var fileUtil: FileUtil
+    private val imagesViewModel: ImagesViewModel by viewModels()
+    private lateinit var fileUtil: FileUtil
     lateinit var recyclerView: RecyclerView
+    lateinit var customImageAdapter: CustomImageAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +43,8 @@ class MainActivity : AppCompatActivity() {
 
         fileUtil = FileUtil(this, applicationContext)
         recyclerView = bundledMainActivity.rvImagesRecycler
+
+
 
         val btn: Button = findViewById(R.id.btnTest)
         btn.setOnClickListener {
@@ -52,17 +58,24 @@ class MainActivity : AppCompatActivity() {
         val storageDir: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val isDir = storageDir?.isDirectory.toString()
 
-        Timber.tag(DEBUG_TAG).d("File: ${storageDir?.absolutePath} is dir=$isDir ")
-        val files =  storageDir?.listFiles()
-        Timber.tag(DEBUG_TAG).d("${files?.size ?: -1}")
+        fileUtil.fetchAllFilesFromDir(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES))
 
-        val rvAdapter = CustomImageAdapter(files as Array<File>)
-        recyclerView.adapter = rvAdapter
+        Timber.tag(DEBUG_TAG).d("File: ${storageDir?.absolutePath} is dir=$isDir ")
+
+        val files =  fileUtil.sortFilesByDate(storageDir?.listFiles())
+        Timber.tag(DEBUG_TAG).d("Total Files: ${files?.size}")
+
+        bundledMainActivity.rvImagesRecycler.apply {
+            customImageAdapter = CustomImageAdapter(files as Array<File>)
+            layoutManager = GridLayoutManager(context, 3)
+            adapter = customImageAdapter
+            itemAnimator = DefaultItemAnimator()
+        }
 
 
         files?.forEach { file ->
-            Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
-            Timber.tag(DEBUG_TAG).d("File: ${file.name} parent= ${file.parentFile}")
+            //Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
+            //Timber.tag(DEBUG_TAG).d(" \\_canRead= ${file.canRead()} | freeSpace= ${file.freeSpace}")
             //file.delete()
 
             //fileUtil.setImageFromPath(file.absolutePath, bundledMainActivity.ivTestImage)
@@ -76,8 +89,19 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Timber.tag(DEBUG_TAG).d("onActivityResult()")
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Timber.tag(DEBUG_TAG).d("image taken ...")
+
+        /** Handling return from image capture activity */
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == RESULT_CANCELED) {
+                //Timber.tag(DEBUG_TAG).d("image was NOT taken ... deleting file")
+                val emptyFile = File(fileUtil.currentPhotoPath)
+                emptyFile.delete()
+            }
+            if (resultCode == RESULT_OK) {
+                //Timber.tag(DEBUG_TAG).d("image was taken")
+            }
+
+
             //val imageBitmap = data?.extras?.get("data") as Bitmap
             //val image: ImageView = findViewById(R.id.ivTestImage)
             //image.setImageBitmap(imageBitmap)

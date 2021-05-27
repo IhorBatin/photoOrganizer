@@ -18,9 +18,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-val REQUEST_IMAGE_CAPTURE = 1
-val DEBUG_TAG = "DEBUGZ"
-
 open class FileUtil(private val activity: Activity, private val context: Context) {
 
     lateinit var currentPhotoPath: String
@@ -31,8 +28,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
-            //"JPEG_${timeStamp}_", /* prefix */
-            "JPEG_TEST_", /* prefix */
+            "JPEG_${timeStamp}_", /* prefix */
             ".jpg", /* suffix */
             storageDir /* directory */
         ).apply {
@@ -68,6 +64,22 @@ open class FileUtil(private val activity: Activity, private val context: Context
                 }
             }
         }
+    }
+
+    fun fetchAllFilesFromDir(rootFile: File?) : Array<out File>? {
+        return rootFile?.listFiles()
+    }
+
+    fun sortFilesByDate(filesList: Array<out File>?, desc: Boolean = false) : Array<out File>? {
+        when (desc) {
+            true -> filesList?.sortBy {
+                it.lastModified()
+            }
+            false -> filesList?.sortByDescending {
+                it.lastModified()
+            }
+        }
+        return filesList
     }
 
     fun setImageFromPath(imgFile: String, imageView: ImageView) {
