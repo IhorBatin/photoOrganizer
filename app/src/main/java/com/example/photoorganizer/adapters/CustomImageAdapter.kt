@@ -1,6 +1,5 @@
 package com.example.photoorganizer.adapters
 
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -33,7 +32,7 @@ class CustomImageAdapter(private val pictureDirectory: Array<File>) : RecyclerVi
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val image: ImageView = itemView.findViewById(R.id.ivImageHolder)
 
-        /** Uri seems to be better format to use than bitmap, at-least for now. */
+        /** Uri seems to be better format to use than bitmap */
         fun setImageFromPath(imgFile: Uri) {
             //val pictureBitmap = BitmapFactory.decodeFile(imgFile)
             //image.setImageBitmap(pictureBitmap)

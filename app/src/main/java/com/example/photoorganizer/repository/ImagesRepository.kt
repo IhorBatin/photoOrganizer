@@ -1,6 +1,6 @@
 package com.example.photoorganizer.repository
 
-class ImagesRepository {
+object ImagesRepository {
 
     fun fetchAllFiles() {
 

@@ -15,13 +15,24 @@
             app:layout_constraintLeft_toLeftOf="parent">
 
             <Button
-                android:id="@+id/btnTest"
+                android:id="@+id/btnImport"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/blue_600"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="15dp"
+                android:text="TEST IMPORT PICTURE"
+                />
+
+            <Button
+                android:id="@+id/btnTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/blue_600"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnImport"
+                android:layout_marginTop="15dp"
                 android:text="TEST TAKE PICTURE"
                 />
 
