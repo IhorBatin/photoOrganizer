@@ -3,16 +3,15 @@ package com.example.photoorganizer.view
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import android.widget.Button
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
-import com.example.photoorganizer.repository.ImagesRepository
 import com.example.photoorganizer.utils.DEBUG_TAG
 import com.example.photoorganizer.utils.FileUtil
 import com.example.photoorganizer.utils.REQUEST_IMAGE_CAPTURE
@@ -26,6 +25,8 @@ import java.io.IOException
 // Guide-> https://developer.android.com/training/camera/photobasics
 // https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media
 
+// RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
+
 // TODO: Add way of creating new folders by user
 // TODO: Add fullscreen image view
 // TODO: Add ability to share image
@@ -34,13 +35,16 @@ import java.io.IOException
 
 /** Future plans/Features */
 // TODO: Add locking app and specific folder feature
+// TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers)
 
 class MainActivity : AppCompatActivity() {
-    lateinit var bundledMainActivity: ActivityMainBinding
-    private val imagesViewModel: ImagesViewModel by viewModels()
+    private lateinit var bundledMainActivity: ActivityMainBinding
+    val imagesViewModel: ImagesViewModel by viewModels()
     private lateinit var fileUtil: FileUtil
-    lateinit var recyclerView: RecyclerView
-    lateinit var customImageAdapter: CustomImageAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var customImageAdapter: CustomImageAdapter
+
+    private var spanCount = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,12 +55,26 @@ class MainActivity : AppCompatActivity() {
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
 
         fileUtil = FileUtil(this, applicationContext)
-        recyclerView = bundledMainActivity.rvImagesRecycler
+        recyclerView = rvImagesRecycler
+        //recyclerView.nes
 
+        setupObservers()
+        val root: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        imagesViewModel.getFilesByDate(root)
 
+        //customImageAdapter = CustomImageAdapter(imagesViewModel.imageListLiveData.value as Array<File>, this)
+        rvImagesRecycler.apply {
+            customImageAdapter = CustomImageAdapter(imagesViewModel.imageListLiveData.value as Array<File>)
+            layoutManager = GridLayoutManager(context, spanCount)
+            adapter = customImageAdapter
+            itemAnimator = DefaultItemAnimator()
+        }
 
-        val btn: Button = findViewById(R.id.btnTest)
-        btn.setOnClickListener {
+        //customImageAdapter.setOnImageClickListener(CustomImageAdapter.OnImageClickedListener) {})
+
+        //rvImagesRecycler.addOnItemTouchListener(RecyclerView.OnItemTouchListener() )
+
+        btnTest.setOnClickListener {
             fileUtil.dispatchTakePictureIntent()
         }
 
@@ -65,27 +83,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     override fun onStart() {
         super.onStart()
 
-        val storageDir: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val isDir = storageDir?.isDirectory.toString()
+        //val storageDir: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        //val isDir = storageDir?.isDirectory.toString()
+        //ImagesRepository.fetchAllFilesFromDir(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES))
 
-        fileUtil.fetchAllFilesFromDir(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES))
+        //Timber.tag(DEBUG_TAG).d("File: ${storageDir?.absolutePath} is dir=$isDir ")
 
-        Timber.tag(DEBUG_TAG).d("File: ${storageDir?.absolutePath} is dir=$isDir ")
-
-        val files =  fileUtil.sortFilesByDate(storageDir?.listFiles())
-        Timber.tag(DEBUG_TAG).d("Total Files: ${files?.size}")
-
-        bundledMainActivity.rvImagesRecycler.apply {
-            customImageAdapter = CustomImageAdapter(files as Array<File>)
-            layoutManager = GridLayoutManager(context, 3)
-            adapter = customImageAdapter
-            itemAnimator = DefaultItemAnimator()
-        }
-
-
+        val files =  imagesViewModel.imageListLiveData.value
+        //Timber.tag(DEBUG_TAG).d("Total Files: ${files?.size}")
 
 
         files?.forEach { file ->
@@ -95,6 +105,20 @@ class MainActivity : AppCompatActivity() {
 
             //fileUtil.setImageFromPath(file.absolutePath, bundledMainActivity.ivTestImage)
         }
+    }
+
+    private fun setupObservers() {
+        imagesViewModel.imageListLiveData.observe(this , Observer { imagesList ->
+            Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
+            customImageAdapter.updateImagesList(imagesList  as Array<File>)
+            customImageAdapter.notifyItemChanged(3)
+        })
+    }
+
+    private fun checkForGestures() {
+        /*bundledMainActivity.root.setOnLongClickListener {
+
+        }*/
     }
 
     /**
@@ -137,7 +161,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
 
 }

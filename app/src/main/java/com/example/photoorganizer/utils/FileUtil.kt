@@ -80,21 +80,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
     }
 
 
-    fun fetchAllFilesFromDir(rootFile: File?) : Array<out File>? {
-        return rootFile?.listFiles()
-    }
-
-    fun sortFilesByDate(filesList: Array<out File>?, desc: Boolean = false) : Array<out File>? {
-        when (desc) {
-            true -> filesList?.sortBy {
-                it.lastModified()
-            }
-            false -> filesList?.sortByDescending {
-                it.lastModified()
-            }
-        }
-        return filesList
-    }
 
     fun readBytesFromUri(uri: Uri): ByteArray? =
         activity.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
