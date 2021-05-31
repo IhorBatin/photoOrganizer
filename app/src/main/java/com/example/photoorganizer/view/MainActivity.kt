@@ -1,11 +1,14 @@
 package com.example.photoorganizer.view
 
 import android.content.Intent
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Bundle
 import android.os.Environment
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ShareCompat
+import androidx.core.content.FileProvider.getUriForFile
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
@@ -22,6 +25,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
+
 // Guide-> https://developer.android.com/training/camera/photobasics
 // https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media
 
@@ -33,17 +37,18 @@ import java.io.IOException
 // TODO: Add ability to delete image
 // TODO: Implement logic do distinguish images from folders and apply default picture for folder.
 
-/** Future plans/Features */
+/** Future Plans/Features */
 // TODO: Add locking app and specific folder feature
 // TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers)
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
-    val imagesViewModel: ImagesViewModel by viewModels()
+    private val imagesViewModel: ImagesViewModel by viewModels()
     private lateinit var fileUtil: FileUtil
     private lateinit var recyclerView: RecyclerView
     private lateinit var customImageAdapter: CustomImageAdapter
 
+    private var root: File? = null
     private var spanCount = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,24 +60,12 @@ class MainActivity : AppCompatActivity() {
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
 
         fileUtil = FileUtil(this, applicationContext)
-        recyclerView = rvImagesRecycler
-        //recyclerView.nes
 
-        setupObservers()
-        val root: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        root = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         imagesViewModel.getFilesByDate(root)
 
-        //customImageAdapter = CustomImageAdapter(imagesViewModel.imageListLiveData.value as Array<File>, this)
-        rvImagesRecycler.apply {
-            customImageAdapter = CustomImageAdapter(imagesViewModel.imageListLiveData.value as Array<File>)
-            layoutManager = GridLayoutManager(context, spanCount)
-            adapter = customImageAdapter
-            itemAnimator = DefaultItemAnimator()
-        }
-
-        //customImageAdapter.setOnImageClickListener(CustomImageAdapter.OnImageClickedListener) {})
-
-        //rvImagesRecycler.addOnItemTouchListener(RecyclerView.OnItemTouchListener() )
+        setupObservers()
+        setupRecyclerView()
 
         btnTest.setOnClickListener {
             fileUtil.dispatchTakePictureIntent()
@@ -84,20 +77,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     override fun onStart() {
         super.onStart()
-
-        //val storageDir: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        //val isDir = storageDir?.isDirectory.toString()
-        //ImagesRepository.fetchAllFilesFromDir(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES))
-
-        //Timber.tag(DEBUG_TAG).d("File: ${storageDir?.absolutePath} is dir=$isDir ")
+        //imagesViewModel.getFilesByDate(root)
 
         val files =  imagesViewModel.imageListLiveData.value
-        //Timber.tag(DEBUG_TAG).d("Total Files: ${files?.size}")
-
-
         files?.forEach { file ->
             //Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
             //Timber.tag(DEBUG_TAG).d(" \\_canRead= ${file.canRead()} | freeSpace= ${file.freeSpace}")
@@ -110,16 +94,62 @@ class MainActivity : AppCompatActivity() {
     private fun setupObservers() {
         imagesViewModel.imageListLiveData.observe(this , Observer { imagesList ->
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
-            customImageAdapter.updateImagesList(imagesList  as Array<File>)
-            customImageAdapter.notifyItemChanged(3)
+            //customImageAdapter.updateImagesList()
+            customImageAdapter.notifyDataSetChanged()
         })
     }
 
-    private fun checkForGestures() {
-        /*bundledMainActivity.root.setOnLongClickListener {
+    private fun setupRecyclerView() {
+        // Setting RV
+        recyclerView = rvImagesRecycler.apply {
+            customImageAdapter = CustomImageAdapter(imagesViewModel)
+            layoutManager = GridLayoutManager(context, spanCount)
+            adapter = customImageAdapter
+            itemAnimator = DefaultItemAnimator()
+        }
 
-        }*/
+        // Setting RV ClickListeners
+        setupRVListeners()
     }
+
+    private fun setupRVListeners() {
+        customImageAdapter.onImageClick = { image ->
+            Timber.tag(DEBUG_TAG).d("Clicked: ${image.name}")
+        }
+
+        customImageAdapter.onImageLongClick = { image ->
+            Timber.tag(DEBUG_TAG).d("Long Clicked: ${image.name}")
+            image.delete()
+            imagesViewModel.getFilesByDate(root)
+            //customImageAdapter.notifyDataSetChanged()
+
+            /** Works but creates temp file in general directory */
+            /*val b = BitmapFactory.decodeFile(image.path)
+            val share = Intent(Intent.ACTION_SEND)
+            share.type = "image/jpeg"
+            val bytes = ByteArrayOutputStream()
+            b.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+            val path = MediaStore.Images.Media.insertImage(contentResolver, b, "Title---", null)
+            val imageUri: Uri = Uri.parse(path)
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            share.putExtra(Intent.EXTRA_STREAM, imageUri)
+            startActivity(Intent.createChooser(share, "Select"))*/
+/*
+            /** Works but weir sharing way */
+            val uri = getUriForFile(this, packageName, image)
+            val intent = ShareCompat.IntentBuilder.from(this)
+                .setStream(uri) // uri from FileProvider
+                .setType("image/jpeg")
+                .intent
+                .setAction(ACTION_SEND) //Change if needed
+                .setDataAndType(uri, "image/*")
+                .addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(intent)
+            */
+ */
+        }
+    }
+
 
     /**
      * Returned image should be coming here if takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
@@ -160,6 +190,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        // Updating date in VM
+        imagesViewModel.getFilesByDate(root)
     }
 
 }

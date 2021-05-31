@@ -17,7 +17,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 open class FileUtil(private val activity: Activity, private val context: Context) {
 
     lateinit var currentPhotoPath: String
