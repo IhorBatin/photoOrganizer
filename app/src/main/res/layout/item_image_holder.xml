@@ -6,9 +6,9 @@
 
     <ImageView
         android:id="@+id/ivImageHolder"
-        android:layout_margin="5dp"
+        android:layout_margin="8dp"
         android:background="@color/yellow_100"
-        android:layout_width="100dp"
+        android:layout_width="match_parent"
         android:layout_height="100dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

@@ -25,7 +25,6 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
-
 // Guide-> https://developer.android.com/training/camera/photobasics
 // https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media
 
@@ -33,13 +32,13 @@ import java.io.IOException
 
 // TODO: Add way of creating new folders by user
 // TODO: Add fullscreen image view
-// TODO: Add ability to share image
+// TODO: Add ability to share image <-DONE, now share multiple images
 // TODO: Add ability to delete image
 // TODO: Implement logic do distinguish images from folders and apply default picture for folder.
 
 /** Future Plans/Features */
 // TODO: Add locking app and specific folder feature
-// TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers)
+// TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
@@ -119,7 +118,7 @@ class MainActivity : AppCompatActivity() {
 
         customImageAdapter.onImageLongClick = { image ->
             Timber.tag(DEBUG_TAG).d("Long Clicked: ${image.name}")
-            image.delete()
+            //image.delete()
             imagesViewModel.getFilesByDate(root)
             //customImageAdapter.notifyDataSetChanged()
 
@@ -134,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             share.putExtra(Intent.EXTRA_STREAM, imageUri)
             startActivity(Intent.createChooser(share, "Select"))*/
-/*
+
             /** Works but weir sharing way */
             val uri = getUriForFile(this, packageName, image)
             val intent = ShareCompat.IntentBuilder.from(this)
@@ -145,8 +144,6 @@ class MainActivity : AppCompatActivity() {
                 .setDataAndType(uri, "image/*")
                 .addFlags(FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
-            */
- */
         }
     }
 
