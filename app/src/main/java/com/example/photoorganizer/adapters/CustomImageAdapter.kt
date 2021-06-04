@@ -1,18 +1,15 @@
 package com.example.photoorganizer.adapters
 
-import android.net.Uri
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
-import com.example.photoorganizer.utils.DEBUG_TAG
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import kotlinx.android.synthetic.main.item_image_holder.view.*
-import timber.log.Timber
 import java.io.File
 
 class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.Adapter<CustomImageAdapter.ImageViewHolder>() {
@@ -28,7 +25,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        viewModel.imageListLiveData.value?.get(position)?.let { holder.setImageFromPath(it.toUri()) }
+        viewModel.imageListLiveData.value?.get(position)?.let { holder.setImageForFile(it) }
     }
 
     override fun getItemCount(): Int {
@@ -58,13 +55,21 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
             }
         }
 
-        /** Uri seems to be better format to use than bitmap */
-        fun setImageFromPath(imgFile: Uri) {
-            Glide
-                .with(image.context)
-                .load(imgFile)
-                .centerCrop()
-                .into(image)
+        fun setImageForFile(file: File) {
+            if (file.isDirectory){
+                image.setBackgroundColor(Color.TRANSPARENT)
+                Glide
+                    .with(image.context)
+                    .load(R.drawable.ic_folder)
+                    .into(image)
+            }
+            else {
+                Glide
+                    .with(image.context)
+                    .load(file)
+                    .centerCrop()
+                    .into(image)
+            }
         }
 
     }

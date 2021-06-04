@@ -38,6 +38,14 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
+    fun createNewDirectory(name: String): File {
+        return File(
+            "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)}${File.separator}$name"
+        ).apply {
+            mkdir()
+        }
+    }
+
     fun dispatchTakePictureIntent() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
@@ -53,7 +61,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
                 photoFile?.also {
                     val photoURI: Uri = FileProvider.getUriForFile(
                         context,
-                        "com.example.photoorganizer",
+                        context.packageName,
                         it
                     )
                     Timber.tag(DEBUG_TAG).d("Starting Picture Intent")
@@ -77,8 +85,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
             startActivityForResult(activity, importImagesIntent, REQUEST_IMAGE_IMPORT, null)
         }
     }
-
-
 
     fun readBytesFromUri(uri: Uri): ByteArray? =
         activity.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }

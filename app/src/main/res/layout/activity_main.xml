@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <Button
+       <!-- <Button
             android:id="@+id/btnImport"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -18,9 +18,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:backgroundTint="@color/blue_600"
-            android:text="TEST IMPORT PICTURE" />
+            android:text="TEST IMPORT PICTURE" />-->
 
-        <Button
+        <!--<Button
             android:id="@+id/btnTest"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnImport"
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:backgroundTint="@color/blue_600"
-            android:text="TEST TAKE PICTURE" />
+            android:text="TEST TAKE PICTURE" />-->
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvImagesRecycler"
@@ -37,8 +37,7 @@
             android:overScrollMode="never"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnTest"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             android:layout_margin="8dp" />
 
         <!--<ImageView

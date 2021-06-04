@@ -5,6 +5,9 @@ import android.content.Intent.ACTION_SEND
 import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Bundle
 import android.os.Environment
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
@@ -13,6 +16,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
 import com.example.photoorganizer.utils.DEBUG_TAG
@@ -36,9 +40,13 @@ import java.io.IOException
 // TODO: Add ability to delete image
 // TODO: Implement logic do distinguish images from folders and apply default picture for folder.
 
+/** Fixes and Bugs */
+// TODO: Fix directory being able to share same as regular image file
+
 /** Future Plans/Features */
 // TODO: Add locking app and specific folder feature
 // TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
+// TODO: When Navigated to folder update its name in toolbar instead of app name
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
@@ -66,15 +74,54 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
         setupRecyclerView()
 
-        btnTest.setOnClickListener {
+        /*btnTest.setOnClickListener {
             fileUtil.dispatchTakePictureIntent()
-        }
+        }*/
 
-        btnImport.setOnClickListener{
+        /*btnImport.setOnClickListener{
             fileUtil.dispatchImportImagesIntent()
-        }
+        }*/
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.top_munu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.miTakePhoto -> {
+                handleTakePhotoClick()
+                true
+            }
+            R.id.miImportPhoto -> {
+                handleImportPhotoClick()
+                true
+            }
+            R.id.miCreateFolder -> {
+                handleCreateNewFolderClick()
+                true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+
+
+    }
+
+    private fun handleTakePhotoClick() {
+        fileUtil.dispatchTakePictureIntent()
+    }
+
+    private fun handleImportPhotoClick() {
+        fileUtil.dispatchImportImagesIntent()
+    }
+
+    private fun handleCreateNewFolderClick() {
+        val newFile = fileUtil.createNewDirectory("testing5")
+        Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
+        imagesViewModel.updateFiles(root)
+    }
 
     override fun onStart() {
         super.onStart()
