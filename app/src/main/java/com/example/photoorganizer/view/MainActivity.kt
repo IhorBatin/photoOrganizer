@@ -34,10 +34,10 @@ import java.io.IOException
 
 // RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
 
-// TODO: Add way of creating new folders by user
+// TODO: Add name of folder in UI
 // TODO: Add fullscreen image view
-// TODO: Add ability to share image <-DONE, now share multiple images
-// TODO: Add ability to delete image
+// TODO: Add ability to share multiple images
+// TODO: Add ability to delete image / multiple images
 // TODO: Implement logic do distinguish images from folders and apply default picture for folder.
 
 /** Fixes and Bugs */
@@ -118,8 +118,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleCreateNewFolderClick() {
-        val newFile = fileUtil.createNewDirectory("testing5")
-        Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
+        //val newFile = fileUtil.createNewDirectory("testing5")
+        fileUtil.showNewFolderAlert()
+        //Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
         imagesViewModel.updateFiles(root)
     }
 
@@ -161,6 +162,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupRVListeners() {
         customImageAdapter.onImageClick = { image ->
             Timber.tag(DEBUG_TAG).d("Clicked: ${image.name}")
+            imagesViewModel.updateFiles(root)
         }
 
         customImageAdapter.onImageLongClick = { image ->
