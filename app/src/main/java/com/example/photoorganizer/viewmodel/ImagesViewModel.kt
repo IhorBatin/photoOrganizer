@@ -9,7 +9,8 @@ class ImagesViewModel : ViewModel() {
     val imageListLiveData: MutableLiveData<Array<out File>> = MutableLiveData()
 
     fun updateFiles(directory: File?) {
-        imageListLiveData.value = ImagesRepository.fetchAllFilesByDate(directory)
+        //imageListLiveData.value = ImagesRepository.fetchAllFilesByDate(directory)
+        imageListLiveData.value = ImagesRepository.getFilesListDirectoriesFirst(ImagesRepository.fetchAllFilesByDate(directory))
     }
 
     fun changeFolder(newFolder: File?) {

@@ -37,7 +37,7 @@ import java.io.IOException
 // TODO: Add fullscreen image view
 // TODO: Add ability to share multiple images
 // TODO: Add ability to delete image / multiple images
-// TODO: Implement logic do distinguish images from folders and apply default picture for folder.
+// TODO: Implement logic do distinguish images from folders and show folder always on top
 
 /** Fixes and Bugs */
 // TODO: Fix directory being able to share same as regular image file
@@ -46,6 +46,7 @@ import java.io.IOException
 // TODO: Add locking app and specific folder feature
 // TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
 // TODO: When Navigated to folder update its name in toolbar instead of app name
+// TODO: apply default picture for folder.
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity() {
 
         fileUtil = FileUtil(this, applicationContext)
 
-        root = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        root = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         imagesViewModel.getFilesByDate(root)
 
         setupObservers()
@@ -80,6 +81,11 @@ class MainActivity : AppCompatActivity() {
         /*btnImport.setOnClickListener{
             fileUtil.dispatchImportImagesIntent()
         }*/
+    }
+
+    override fun onResume() {
+        super.onResume()
+        imagesViewModel.updateFiles(root)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -104,8 +110,6 @@ class MainActivity : AppCompatActivity() {
             }
             else -> return super.onOptionsItemSelected(item)
         }
-
-
     }
 
     private fun handleTakePhotoClick() {
@@ -236,7 +240,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         // Updating date in VM
-        imagesViewModel.getFilesByDate(root)
+        imagesViewModel.updateFiles(root)
+        //customImageAdapter.notifyDataSetChanged()
     }
 
 }

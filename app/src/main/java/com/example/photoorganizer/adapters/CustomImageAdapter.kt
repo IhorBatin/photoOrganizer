@@ -33,8 +33,8 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
         return viewModel.imageListLiveData.value?.size ?: 0
     }
 
-    /*fun updateImagesList() {
-        pictureDirectory = viewModel.imageListLiveData.value as Array<File>
+/*    fun updateImagesList() {
+        val pictureDirectory = viewModel.imageListLiveData.value as Array<File>
         notifyDataSetChanged()
     }*/
 
@@ -69,6 +69,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
                     .into(image)
             }
             else {
+                itemView.tvDirTitle.visibility = View.GONE
                 Glide
                     .with(image.context)
                     .load(file)
