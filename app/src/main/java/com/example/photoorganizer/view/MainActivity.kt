@@ -34,7 +34,6 @@ import java.io.IOException
 
 // RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
 
-// TODO: Add name of folder in UI
 // TODO: Add fullscreen image view
 // TODO: Add ability to share multiple images
 // TODO: Add ability to delete image / multiple images
@@ -119,9 +118,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleCreateNewFolderClick() {
         //val newFile = fileUtil.createNewDirectory("testing5")
-        fileUtil.showNewFolderAlert()
+        fileUtil.showNewFolderAlert(imagesViewModel, root)
         //Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
-        imagesViewModel.updateFiles(root)
+        //imagesViewModel.updateFiles(root)
     }
 
     override fun onStart() {
@@ -162,7 +161,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupRVListeners() {
         customImageAdapter.onImageClick = { image ->
             Timber.tag(DEBUG_TAG).d("Clicked: ${image.name}")
-            imagesViewModel.updateFiles(root)
+            //imagesViewModel.updateFiles(root)
         }
 
         customImageAdapter.onImageLongClick = { image ->
@@ -183,7 +182,7 @@ class MainActivity : AppCompatActivity() {
             share.putExtra(Intent.EXTRA_STREAM, imageUri)
             startActivity(Intent.createChooser(share, "Select"))*/
 
-            /** Works but weir sharing way */
+            /** Works but weird way of sharing */
             val uri = getUriForFile(this, packageName, image)
             val intent = ShareCompat.IntentBuilder.from(this)
                 .setStream(uri) // uri from FileProvider

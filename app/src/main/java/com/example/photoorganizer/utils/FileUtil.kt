@@ -20,6 +20,7 @@ import androidx.core.content.FileProvider
 import com.example.photoorganizer.R
 import com.example.photoorganizer.ext.toggleErrorMessage
 import com.example.photoorganizer.repository.ImagesRepository
+import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 import java.io.File
@@ -117,7 +118,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
     }
 
     @SuppressLint("InflateParams")
-    fun showNewFolderAlert() {
+    fun showNewFolderAlert(vm: ImagesViewModel, file: File?) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.edit_text_custom_alert, null)
 
@@ -146,6 +147,8 @@ open class FileUtil(private val activity: Activity, private val context: Context
                     newDirName.isNotBlank() and isAlphaNumeric and
                             !doesFileAlreadyExists(newDirName)  and !isTooLong -> {
                         createNewDirectory(newDirName)
+                        // Updating RV UI after file is created
+                        vm.updateFiles(file)
                         dialog.dismiss()
                     }
                     doesFileAlreadyExists(newDirName) -> {

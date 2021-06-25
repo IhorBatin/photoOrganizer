@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
@@ -56,7 +57,11 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
         }
 
         fun setImageForFile(file: File) {
-            if (file.isDirectory){
+            if (file.isDirectory) {
+               itemView.tvDirTitle.let {
+                   it.visibility = View.VISIBLE
+                   it.text = file.name
+                }
                 image.setBackgroundColor(Color.TRANSPARENT)
                 Glide
                     .with(image.context)
