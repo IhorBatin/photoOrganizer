@@ -37,7 +37,6 @@ import java.io.IOException
 // TODO: Add fullscreen image view
 // TODO: Add ability to share multiple images
 // TODO: Add ability to delete image / multiple images
-// TODO: Implement logic do distinguish images from folders and show folder always on top
 
 /** Fixes and Bugs */
 // TODO: Fix directory being able to share same as regular image file
@@ -164,12 +163,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRVListeners() {
         customImageAdapter.onImageClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Clicked: ${image.name}")
+            Timber.tag(DEBUG_TAG).d("Clicked: '${image.name}'")
             //imagesViewModel.updateFiles(root)
         }
 
         customImageAdapter.onImageLongClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Long Clicked: ${image.name}")
+            Timber.tag(DEBUG_TAG).d("Long Clicked: '${image.name}'")
             //image.delete()
             imagesViewModel.getFilesByDate(root)
             //customImageAdapter.notifyDataSetChanged()

@@ -127,7 +127,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
             R.style.ThemeOverlay_App_MaterialAlertDialog
         ).setCancelable(false)
             .setCustomTitle(customView)
-            .setNegativeButton("Cancel") { dialog, which ->
+            .setNegativeButton("Cancel") { dialog, _ ->
                 // Respond to negative button press
                 dialog.dismiss()
             }
