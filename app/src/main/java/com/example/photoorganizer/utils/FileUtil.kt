@@ -2,15 +2,26 @@ package com.example.photoorganizer.utils
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
+import com.example.photoorganizer.R
+import com.example.photoorganizer.ext.toggleErrorMessage
+import com.example.photoorganizer.repository.ImagesRepository
+import com.example.photoorganizer.viewmodel.ImagesViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -38,6 +49,26 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
+    private fun createNewDirectory(name: String): File {
+        return File(
+            "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)}${File.separator}$name"
+        ).apply {
+            Timber.tag(DEBUG_TAG).d("Creating new directory: '$name'")
+            mkdir()
+        }
+    }
+
+    private fun doesFileAlreadyExists(neFileName: String) : Boolean{
+        ImagesRepository.fetchAllFilesByDate(
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        ).also {
+            it?.forEach { file ->
+                if (file.name.equals(neFileName, ignoreCase = true)) return true
+            }
+        }
+        return false
+    }
+
     fun dispatchTakePictureIntent() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
@@ -53,7 +84,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
                 photoFile?.also {
                     val photoURI: Uri = FileProvider.getUriForFile(
                         context,
-                        "com.example.photoorganizer",
+                        context.packageName,
                         it
                     )
                     Timber.tag(DEBUG_TAG).d("Starting Picture Intent")
@@ -78,8 +109,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
-
-
     fun readBytesFromUri(uri: Uri): ByteArray? =
         activity.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
 
@@ -88,5 +117,64 @@ open class FileUtil(private val activity: Activity, private val context: Context
         imageView.setImageBitmap(pictureBitmap)
     }
 
+    @SuppressLint("InflateParams")
+    fun showNewFolderAlert(vm: ImagesViewModel, file: File?) {
+        val layoutInflater = LayoutInflater.from(context)
+        val customView: View = layoutInflater.inflate(R.layout.edit_text_custom_alert, null)
 
+        val dialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        ).setCancelable(false)
+            .setCustomTitle(customView)
+            .setNegativeButton("Cancel") { dialog, _ ->
+                // Respond to negative button press
+                dialog.dismiss()
+            }
+            .setPositiveButton("Confirm", null)
+            .create()
+
+        dialog.setOnShowListener() {
+            val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+
+            positiveBtn.setOnClickListener {
+                val newDirEditText = customView.findViewById<EditText>(R.id.etDirectoryName)
+                val newDirName = newDirEditText.text.toString()
+                val isAlphaNumeric = newDirName.all { it.isLetterOrDigit() }
+                val isTooLong = newDirName.length >= 15
+
+                when {
+                    newDirName.isNotBlank() and isAlphaNumeric and
+                            !doesFileAlreadyExists(newDirName)  and !isTooLong -> {
+                        createNewDirectory(newDirName)
+                        // Updating RV UI after file is created
+                        vm.updateFiles(file)
+                        dialog.dismiss()
+                    }
+                    doesFileAlreadyExists(newDirName) -> {
+                        Timber.tag(DEBUG_TAG).d(context.getString(R.string.Error_FileAlreadyExists))
+                        customView.findViewById<TextView>(R.id.tvErrorMessage)
+                            .toggleErrorMessage(R.string.Error_FileAlreadyExists)
+                    }
+                    newDirName.isBlank() or !isAlphaNumeric -> {
+                        Timber.tag(DEBUG_TAG).d(context.getString(R.string.Error_IllegalFileName))
+                        customView.findViewById<TextView>(R.id.tvErrorMessage)
+                            .toggleErrorMessage(R.string.Error_IllegalFileName)
+                    }
+                    isTooLong -> {
+                        Timber.tag(DEBUG_TAG).d(context.getString(R.string.Error_FileNameTooLong))
+                        customView.findViewById<TextView>(R.id.tvErrorMessage)
+                            .toggleErrorMessage(R.string.Error_FileNameTooLong)
+                    }
+                }
+            }
+        }
+
+
+        dialog.show()
+        // Important to clear given flags in order for keyboard to show up
+        dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+    }
 }
+
+

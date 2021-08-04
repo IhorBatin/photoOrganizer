@@ -5,6 +5,9 @@ import android.content.Intent.ACTION_SEND
 import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Bundle
 import android.os.Environment
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
@@ -13,6 +16,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
 import com.example.photoorganizer.utils.DEBUG_TAG
@@ -25,21 +29,23 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
-
 // Guide-> https://developer.android.com/training/camera/photobasics
 // https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media
 
 // RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
 
-// TODO: Add way of creating new folders by user
 // TODO: Add fullscreen image view
-// TODO: Add ability to share image
-// TODO: Add ability to delete image
-// TODO: Implement logic do distinguish images from folders and apply default picture for folder.
+// TODO: Add ability to share multiple images
+// TODO: Add ability to delete image / multiple images
+
+/** Fixes and Bugs */
+// TODO: Fix directory being able to share same as regular image file
 
 /** Future Plans/Features */
 // TODO: Add locking app and specific folder feature
-// TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers)
+// TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
+// TODO: When Navigated to folder update its name in toolbar instead of app name
+// TODO: apply default picture for folder.
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
@@ -61,21 +67,64 @@ class MainActivity : AppCompatActivity() {
 
         fileUtil = FileUtil(this, applicationContext)
 
-        root = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        root = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         imagesViewModel.getFilesByDate(root)
 
         setupObservers()
         setupRecyclerView()
 
-        btnTest.setOnClickListener {
+        /*btnTest.setOnClickListener {
             fileUtil.dispatchTakePictureIntent()
-        }
+        }*/
 
-        btnImport.setOnClickListener{
+        /*btnImport.setOnClickListener{
             fileUtil.dispatchImportImagesIntent()
+        }*/
+    }
+
+    override fun onResume() {
+        super.onResume()
+        imagesViewModel.updateFiles(root)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.top_munu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.miTakePhoto -> {
+                handleTakePhotoClick()
+                true
+            }
+            R.id.miImportPhoto -> {
+                handleImportPhotoClick()
+                true
+            }
+            R.id.miCreateFolder -> {
+                handleCreateNewFolderClick()
+                true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 
+    private fun handleTakePhotoClick() {
+        fileUtil.dispatchTakePictureIntent()
+    }
+
+    private fun handleImportPhotoClick() {
+        fileUtil.dispatchImportImagesIntent()
+    }
+
+    private fun handleCreateNewFolderClick() {
+        //val newFile = fileUtil.createNewDirectory("testing5")
+        fileUtil.showNewFolderAlert(imagesViewModel, root)
+        //Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
+        //imagesViewModel.updateFiles(root)
+    }
 
     override fun onStart() {
         super.onStart()
@@ -114,12 +163,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRVListeners() {
         customImageAdapter.onImageClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Clicked: ${image.name}")
+            Timber.tag(DEBUG_TAG).d("Clicked: '${image.name}'")
+            //imagesViewModel.updateFiles(root)
         }
 
         customImageAdapter.onImageLongClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Long Clicked: ${image.name}")
-            image.delete()
+            Timber.tag(DEBUG_TAG).d("Long Clicked: '${image.name}'")
+            //image.delete()
             imagesViewModel.getFilesByDate(root)
             //customImageAdapter.notifyDataSetChanged()
 
@@ -134,8 +184,8 @@ class MainActivity : AppCompatActivity() {
             share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             share.putExtra(Intent.EXTRA_STREAM, imageUri)
             startActivity(Intent.createChooser(share, "Select"))*/
-/*
-            /** Works but weir sharing way */
+
+            /** Works but weird way of sharing */
             val uri = getUriForFile(this, packageName, image)
             val intent = ShareCompat.IntentBuilder.from(this)
                 .setStream(uri) // uri from FileProvider
@@ -145,8 +195,6 @@ class MainActivity : AppCompatActivity() {
                 .setDataAndType(uri, "image/*")
                 .addFlags(FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
-            */
- */
         }
     }
 
@@ -191,7 +239,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         // Updating date in VM
-        imagesViewModel.getFilesByDate(root)
+        imagesViewModel.updateFiles(root)
+        //customImageAdapter.notifyDataSetChanged()
     }
 
 }
