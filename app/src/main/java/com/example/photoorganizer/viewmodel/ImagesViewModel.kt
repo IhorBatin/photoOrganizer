@@ -13,9 +13,9 @@ class ImagesViewModel : ViewModel() {
         imageListLiveData.value = ImagesRepository.getFilesListDirectoriesFirst(ImagesRepository.fetchAllFilesByDate(directory))
     }
 
-    fun changeFolder(newFolder: File?) {
+    /*fun changeFolder(newFolder: File?) {
         imageListLiveData.value = ImagesRepository.fetchAllFilesByDate(newFolder)
-    }
+    }*/
 
 
     fun getFilesByDate(rootFile: File?, desc: Boolean = false) {

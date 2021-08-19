@@ -37,15 +37,16 @@ import java.io.IOException
 // TODO: Add fullscreen image view
 // TODO: Add ability to share multiple images
 // TODO: Add ability to delete image / multiple images
+// TODO: Add layer ability to add folders inside folders
 
 /** Fixes and Bugs */
 // TODO: Fix directory being able to share same as regular image file
 
 /** Future Plans/Features */
-// TODO: Add locking app and specific folder feature
+// TODO: Add locking app and specific folder feature [use ext functions on File obj to to do this]
 // TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
 // TODO: When Navigated to folder update its name in toolbar instead of app name
-// TODO: apply default picture for folder.
+// TODO: apply default picture for folder. OR add ability to choose folder color.
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
@@ -54,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var customImageAdapter: CustomImageAdapter
 
-    private var root: File? = null
+    private lateinit var rootDir: File
     private var spanCount = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,24 +68,17 @@ class MainActivity : AppCompatActivity() {
 
         fileUtil = FileUtil(this, applicationContext)
 
-        root = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        imagesViewModel.getFilesByDate(root)
+        rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+        imagesViewModel.getFilesByDate(rootDir)
+        //Timber.tag(DEBUG_TAG).d("Root = ${rootDir.path}")
 
         setupObservers()
         setupRecyclerView()
-
-        /*btnTest.setOnClickListener {
-            fileUtil.dispatchTakePictureIntent()
-        }*/
-
-        /*btnImport.setOnClickListener{
-            fileUtil.dispatchImportImagesIntent()
-        }*/
     }
 
     override fun onResume() {
         super.onResume()
-        imagesViewModel.updateFiles(root)
+        imagesViewModel.updateFiles(rootDir)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -112,7 +106,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleTakePhotoClick() {
-        fileUtil.dispatchTakePictureIntent()
+        fileUtil.dispatchTakePictureIntent(rootDir)
     }
 
     private fun handleImportPhotoClick() {
@@ -121,7 +115,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleCreateNewFolderClick() {
         //val newFile = fileUtil.createNewDirectory("testing5")
-        fileUtil.showNewFolderAlert(imagesViewModel, root)
+        fileUtil.showNewFolderAlert(imagesViewModel, rootDir)
         //Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
         //imagesViewModel.updateFiles(root)
     }
@@ -140,10 +134,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        if (rootDir.name == Environment.DIRECTORY_PICTURES) {
+            super.onBackPressed()
+        }
+        else {
+            rootDir = rootDir.parentFile
+            imagesViewModel.updateFiles(rootDir)
+        }
+    }
+
     private fun setupObservers() {
         imagesViewModel.imageListLiveData.observe(this , Observer { imagesList ->
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
-            //customImageAdapter.updateImagesList()
             customImageAdapter.notifyDataSetChanged()
         })
     }
@@ -162,15 +165,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRVListeners() {
-        customImageAdapter.onImageClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Clicked: '${image.name}'")
-            //imagesViewModel.updateFiles(root)
+        customImageAdapter.onImageClick = { file ->
+            Timber.tag(DEBUG_TAG).d("Clicked: '${file.name}'")
+            if (file.isDirectory) handleOnDirectoryClick(file)
+            else handleOnImageClick(file)
+
+            imagesViewModel.updateFiles(rootDir)
         }
 
-        customImageAdapter.onImageLongClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Long Clicked: '${image.name}'")
-            //image.delete()
-            imagesViewModel.getFilesByDate(root)
+        customImageAdapter.onImageLongClick = { file ->
+            Timber.tag(DEBUG_TAG).d("Long Clicked: '${file.name}'")
+            //file.delete()
+
+            //imagesViewModel.getFilesByDate(rootDir)
             //customImageAdapter.notifyDataSetChanged()
 
             /** Works but creates temp file in general directory */
@@ -186,7 +193,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent.createChooser(share, "Select"))*/
 
             /** Works but weird way of sharing */
-            val uri = getUriForFile(this, packageName, image)
+            val uri = getUriForFile(this, packageName, file)
             val intent = ShareCompat.IntentBuilder.from(this)
                 .setStream(uri) // uri from FileProvider
                 .setType("image/jpeg")
@@ -198,6 +205,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleOnImageClick(image: File) {
+
+    }
+
+    private fun handleOnDirectoryClick(dir: File) {
+        rootDir = dir
+        imagesViewModel.getFilesByDate(rootDir)
+        Timber.tag(DEBUG_TAG).d("New root = ${rootDir.path}")
+        Timber.tag(DEBUG_TAG).d(" Contains files = ${rootDir.listFiles().size}")
+        //Timber.tag(DEBUG_TAG).d(" Contains files = ${rootDir}")
+    }
 
     /**
      * Returned image should be coming here if takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
@@ -224,9 +242,9 @@ class MainActivity : AppCompatActivity() {
 
                 for (i in 0 until numOfImports) {
                     val currentImageUri = data.clipData?.getItemAt(i)?.uri
-                    Timber.tag(DEBUG_TAG).e("Import #$i -> $currentImageUri")
+                    Timber.tag(DEBUG_TAG).d("Import #$i -> $currentImageUri")
                     val photoFile: File? = try {
-                        fileUtil.createImageFile()
+                        fileUtil.createImageFile(rootDir)
                     } catch (ex: IOException) {
                         Timber.tag(DEBUG_TAG).d("Error while creating file...")
                         null
@@ -239,7 +257,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         // Updating date in VM
-        imagesViewModel.updateFiles(root)
+        imagesViewModel.updateFiles(rootDir)
         //customImageAdapter.notifyDataSetChanged()
     }
 
