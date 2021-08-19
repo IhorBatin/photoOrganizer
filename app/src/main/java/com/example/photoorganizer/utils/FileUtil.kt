@@ -5,15 +5,12 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Environment
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
@@ -37,14 +34,12 @@ open class FileUtil(private val activity: Activity, private val context: Context
     fun createImageFile(dir: File): File {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmssss").format(Date())
-        //val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val storageDir: File? = dir
         return File.createTempFile(
             "JPEG_${timeStamp}_", /* prefix */
             ".jpg", /* suffix */
-            storageDir /* directory */
+            dir /* directory */
         ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
+            // Save a file: path for use with intents
             currentPhotoPath = absolutePath
             //Timber.tag(DEBUG_TAG).d("new photoPath -> $currentPhotoPath")
         }
@@ -69,6 +64,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         return false
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     fun dispatchTakePictureIntent(dir: File) {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
@@ -113,10 +109,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
     fun readBytesFromUri(uri: Uri): ByteArray? =
         activity.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
 
-    fun setImageFromPath(imgFile: String, imageView: ImageView) {
-        val pictureBitmap = BitmapFactory.decodeFile(imgFile)
-        imageView.setImageBitmap(pictureBitmap)
-    }
 
     @SuppressLint("InflateParams")
     fun showNewFolderAlert(vm: ImagesViewModel, dir: File) {
@@ -135,7 +127,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
             .setPositiveButton("Confirm", null)
             .create()
 
-        dialog.setOnShowListener() {
+        dialog.setOnShowListener {
             val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
 
             positiveBtn.setOnClickListener {
@@ -176,6 +168,11 @@ open class FileUtil(private val activity: Activity, private val context: Context
         // Important to clear given flags in order for keyboard to show up
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
+
+    /*fun setImageFromPath(imgFile: String, imageView: ImageView) {
+        val pictureBitmap = BitmapFactory.decodeFile(imgFile)
+        imageView.setImageBitmap(pictureBitmap)
+    }*/
 }
 
 

@@ -177,31 +177,35 @@ class MainActivity : AppCompatActivity() {
             Timber.tag(DEBUG_TAG).d("Long Clicked: '${file.name}'")
             //file.delete()
 
+            if (file.isDirectory) {
+                // TODO: Handle [Delete, Setup Password, Remove Password, ...]
+            }
+            else {
+                /** Works but creates temp file in general directory */
+                /*val b = BitmapFactory.decodeFile(image.path)
+                val share = Intent(Intent.ACTION_SEND)
+                share.type = "image/jpeg"
+                val bytes = ByteArrayOutputStream()
+                b.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+                val path = MediaStore.Images.Media.insertImage(contentResolver, b, "Title---", null)
+                val imageUri: Uri = Uri.parse(path)
+                share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                share.putExtra(Intent.EXTRA_STREAM, imageUri)
+                startActivity(Intent.createChooser(share, "Select"))*/
+
+                /** Works but weird way of sharing */
+                val uri = getUriForFile(this, packageName, file)
+                val intent = ShareCompat.IntentBuilder.from(this)
+                    .setStream(uri) // uri from FileProvider
+                    .setType("image/jpeg")
+                    .intent
+                    .setAction(ACTION_SEND) //Change if needed
+                    .setDataAndType(uri, "image/*")
+                    .addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+                startActivity(intent)
+            }
             //imagesViewModel.getFilesByDate(rootDir)
             //customImageAdapter.notifyDataSetChanged()
-
-            /** Works but creates temp file in general directory */
-            /*val b = BitmapFactory.decodeFile(image.path)
-            val share = Intent(Intent.ACTION_SEND)
-            share.type = "image/jpeg"
-            val bytes = ByteArrayOutputStream()
-            b.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-            val path = MediaStore.Images.Media.insertImage(contentResolver, b, "Title---", null)
-            val imageUri: Uri = Uri.parse(path)
-            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            share.putExtra(Intent.EXTRA_STREAM, imageUri)
-            startActivity(Intent.createChooser(share, "Select"))*/
-
-            /** Works but weird way of sharing */
-            val uri = getUriForFile(this, packageName, file)
-            val intent = ShareCompat.IntentBuilder.from(this)
-                .setStream(uri) // uri from FileProvider
-                .setType("image/jpeg")
-                .intent
-                .setAction(ACTION_SEND) //Change if needed
-                .setDataAndType(uri, "image/*")
-                .addFlags(FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(intent)
         }
     }
 
