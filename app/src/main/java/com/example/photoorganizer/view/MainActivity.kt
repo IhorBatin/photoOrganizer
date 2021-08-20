@@ -24,7 +24,6 @@ import com.example.photoorganizer.utils.FileUtil
 import com.example.photoorganizer.utils.REQUEST_IMAGE_CAPTURE
 import com.example.photoorganizer.utils.REQUEST_IMAGE_IMPORT
 import com.example.photoorganizer.viewmodel.ImagesViewModel
-import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -153,7 +152,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         // Setting RV
-        recyclerView = rvImagesRecycler.apply {
+        recyclerView = bundledMainActivity.rvImagesRecycler.apply {
             customImageAdapter = CustomImageAdapter(imagesViewModel)
             layoutManager = GridLayoutManager(context, spanCount)
             adapter = customImageAdapter

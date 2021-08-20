@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
 import com.example.photoorganizer.viewmodel.ImagesViewModel
-import kotlinx.android.synthetic.main.item_image_holder.view.*
 import java.io.File
 
 class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.Adapter<CustomImageAdapter.ImageViewHolder>() {
@@ -39,7 +38,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
     }*/
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val image: ImageView = itemView.ivImageHolder
+        private val image: ImageView = itemView.findViewById(R.id.ivImageHolder)
 
         init {
             image.setOnClickListener {
@@ -58,7 +57,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
 
         fun setImageForFile(file: File) {
             if (file.isDirectory) {
-               itemView.tvDirTitle.let {
+               itemView.findViewById<TextView>(R.id.tvDirTitle).let {
                    it.visibility = View.VISIBLE
                    it.text = file.name
                 }
@@ -69,7 +68,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
                     .into(image)
             }
             else {
-                itemView.tvDirTitle.visibility = View.GONE
+                itemView.findViewById<TextView>(R.id.tvDirTitle).visibility = View.GONE
                 Glide
                     .with(image.context)
                     .load(file)
