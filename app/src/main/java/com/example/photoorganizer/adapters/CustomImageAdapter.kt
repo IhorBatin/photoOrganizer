@@ -25,11 +25,11 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        viewModel.imageListLiveData.value?.get(position)?.let { holder.setImageForFile(it) }
+        viewModel.filesListLiveData.value?.get(position)?.let { holder.setImageForFile(it) }
     }
 
     override fun getItemCount(): Int {
-        return viewModel.imageListLiveData.value?.size ?: 0
+        return viewModel.filesListLiveData.value?.size ?: 0
     }
 
 /*    fun updateImagesList() {
@@ -42,12 +42,12 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
 
         init {
             image.setOnClickListener {
-                viewModel.imageListLiveData.value?.get(adapterPosition)?.let { file ->
+                viewModel.filesListLiveData.value?.get(adapterPosition)?.let { file ->
                     onImageClick?.invoke(file)
                 }
             }
             image.setOnLongClickListener {
-                viewModel.imageListLiveData.value?.get(adapterPosition)?.let { file ->
+                viewModel.filesListLiveData.value?.get(adapterPosition)?.let { file ->
                     onImageLongClick?.invoke(file)
                 }
 

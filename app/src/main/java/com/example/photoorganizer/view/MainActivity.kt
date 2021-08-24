@@ -33,11 +33,12 @@ import java.io.IOException
 
 // RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
 
-// TODO: Add fullscreen image view
+// TODO: Add fullscreen image view[started]
 // TODO: Add ability to share multiple images
 // TODO: Add ability to delete image / multiple images
 
 /** Fixes and Bugs */
+// TODO: Clean nup logic code in activity and view model before proceeding with ViewPager
 // TODO: Fix directory being able to share same as regular image file
 
 /** Future Plans/Features */
@@ -67,7 +68,8 @@ class MainActivity : AppCompatActivity() {
         fileUtil = FileUtil(this, applicationContext)
 
         rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-        imagesViewModel.getFilesByDate(rootDir)
+        //imagesViewModel.getFilesByDate(rootDir)
+        imagesViewModel.setRootDir(rootDir)
         //Timber.tag(DEBUG_TAG).d("Root = ${rootDir.path}")
 
         setupObservers()
@@ -76,7 +78,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        imagesViewModel.updateFiles(rootDir)
+        //imagesViewModel.updateFiles(rootDir)
+        imagesViewModel.setRootDir(rootDir)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -122,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         //imagesViewModel.getFilesByDate(root)
 
-        val files =  imagesViewModel.imageListLiveData.value
+        val files =  imagesViewModel.filesListLiveData.value
         files?.forEach { file ->
             //Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
             //Timber.tag(DEBUG_TAG).d(" \\_canRead= ${file.canRead()} | freeSpace= ${file.freeSpace}")
@@ -138,12 +141,13 @@ class MainActivity : AppCompatActivity() {
         }
         else {
             rootDir = rootDir.parentFile
-            imagesViewModel.updateFiles(rootDir)
+            //imagesViewModel.updateFiles(rootDir)
+            imagesViewModel.setRootDir(rootDir)
         }
     }
 
     private fun setupObservers() {
-        imagesViewModel.imageListLiveData.observe(this , Observer { imagesList ->
+        imagesViewModel.filesListLiveData.observe(this , Observer { imagesList ->
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
             customImageAdapter.notifyDataSetChanged()
         })
@@ -168,7 +172,8 @@ class MainActivity : AppCompatActivity() {
             if (file.isDirectory) handleOnDirectoryClick(file)
             else handleOnImageClick(file)
 
-            imagesViewModel.updateFiles(rootDir)
+            //imagesViewModel.updateFiles(rootDir)
+            imagesViewModel.setRootDir(rootDir)
         }
 
         customImageAdapter.onImageLongClick = { file ->
@@ -208,7 +213,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleOnImageClick(image: File) {
-        //startActivity(Intent(this, ScreenSlidePagerActivity::class.java))
+        startActivity(Intent(this, ScreenSlidePagerActivity::class.java))
+
     }
 
     private fun handleOnDirectoryClick(dir: File) {
@@ -259,7 +265,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         // Updating date in VM
-        imagesViewModel.updateFiles(rootDir)
+        //imagesViewModel.updateFiles(rootDir)
+        imagesViewModel.setRootDir(rootDir)
         //customImageAdapter.notifyDataSetChanged()
     }
 

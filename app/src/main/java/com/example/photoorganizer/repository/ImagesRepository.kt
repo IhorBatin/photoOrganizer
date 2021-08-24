@@ -8,6 +8,10 @@ object ImagesRepository {
         return sortFilesByDate(fetchAllFilesFromDir(rootFile), desc)
     }
 
+    fun fetchImagesOnlyByDate(rootFile: File?, desc: Boolean = false) : Array<out File>? {
+        return sortFilesByDate(fetchAllFilesFromDir(rootFile), desc)
+    }
+
     private fun fetchAllFilesFromDir(rootFile: File?) : Array<out File>? {
         return rootFile?.listFiles()
     }
@@ -37,6 +41,17 @@ object ImagesRepository {
             else picturesList.add(file)
         }
         return (dirsList + picturesList).toMutableList().toTypedArray()
+    }
+
+    /**
+     * Sorts all files in a way that directories will not be returned, only files
+     */
+    fun getListOfImagesOnly(sortedFiles: Array<out File>?) : Array<out File> {
+        val picturesList = mutableListOf<File>()
+        sortedFiles?.forEach { file ->
+            if (file.isFile) picturesList.add(file)
+        }
+        return picturesList.toTypedArray()
     }
 
 }

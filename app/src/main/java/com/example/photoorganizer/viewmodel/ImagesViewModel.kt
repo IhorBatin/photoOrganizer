@@ -6,11 +6,13 @@ import com.example.photoorganizer.repository.ImagesRepository
 import java.io.File
 
 class ImagesViewModel : ViewModel() {
-    val imageListLiveData: MutableLiveData<Array<out File>> = MutableLiveData()
+    val filesListLiveData: MutableLiveData<Array<out File>> = MutableLiveData()
+    val imagesListLiveData: MutableLiveData<Array<out File>> = MutableLiveData()
+    val rootDirLiveData: MutableLiveData<File> = MutableLiveData()
 
-    fun updateFiles(directory: File?) {
+    private fun updateFiles(directory: File?) {
         //imageListLiveData.value = ImagesRepository.fetchAllFilesByDate(directory)
-        imageListLiveData.value = ImagesRepository.getFilesListDirectoriesFirst(ImagesRepository.fetchAllFilesByDate(directory))
+        filesListLiveData.value = ImagesRepository.getFilesListDirectoriesFirst(ImagesRepository.fetchAllFilesByDate(directory))
     }
 
     /*fun changeFolder(newFolder: File?) {
@@ -19,6 +21,17 @@ class ImagesViewModel : ViewModel() {
 
 
     fun getFilesByDate(rootFile: File?, desc: Boolean = false) {
-        imageListLiveData.value = ImagesRepository.fetchAllFilesByDate(rootFile, desc)
+        filesListLiveData.value = ImagesRepository.fetchAllFilesByDate(rootFile, desc)
     }
+
+    fun getImagesForViewPager(directory: File?, desc: Boolean = false) {
+        imagesListLiveData.value = ImagesRepository.getListOfImagesOnly(ImagesRepository.fetchAllFilesByDate(directory))
+    }
+
+    fun setRootDir(root: File) {
+        rootDirLiveData.value = root
+        updateFiles(root)
+    }
+
+    fun getCurrentRoot() : File? = rootDirLiveData.value
 }

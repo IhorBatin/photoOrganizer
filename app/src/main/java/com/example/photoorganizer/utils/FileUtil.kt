@@ -141,7 +141,8 @@ open class FileUtil(private val activity: Activity, private val context: Context
                             !doesFileAlreadyExists(newDirName, dir)  and !isTooLong -> {
                         createNewDirectory(newDirName, dir)
                         // Updating RV UI after file is created
-                        vm.updateFiles(dir)
+                        //vm.updateFiles(dir)
+                        vm.setRootDir(dir)
                         dialog.dismiss()
                     }
                     doesFileAlreadyExists(newDirName, dir) -> {
