@@ -36,7 +36,6 @@ import java.io.IOException
 // TODO: Add fullscreen image view
 // TODO: Add ability to share multiple images
 // TODO: Add ability to delete image / multiple images
-// TODO: Add layer ability to add folders inside folders
 
 /** Fixes and Bugs */
 // TODO: Fix directory being able to share same as regular image file
@@ -209,7 +208,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleOnImageClick(image: File) {
-
+        //startActivity(Intent(this, ScreenSlidePagerActivity::class.java))
     }
 
     private fun handleOnDirectoryClick(dir: File) {
