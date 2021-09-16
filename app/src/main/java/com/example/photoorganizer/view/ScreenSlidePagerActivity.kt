@@ -21,24 +21,30 @@ class ScreenSlidePagerActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen_slide)
 
-        //curDirectory =  getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-        imagesViewModel.getImagesForViewPager(getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!)
-        //setupViewPager()
+        curDirectory =  getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+        imagesViewModel.getImagesForViewPager(curDirectory)
+        //imagesViewModel.getImagesForViewPager(imagesViewModel.getCurrentRoot()?.parentFile)
         setupObservers()
+        setupViewPager()
     }
 
     private fun setupObservers() {
         imagesViewModel.imagesListLiveData.observe(this, { imagesList ->
-            setupViewPager(imagesList)
+            setupViewPager()
+        })
+
+        imagesViewModel.rootDirLiveData.observe(this, {
+            imagesViewModel.setRootDir(it)
+            setupViewPager()
         })
     }
 
-    private fun setupViewPager(imagesList: Array<out File>) {
+    private fun setupViewPager() {
         // Instantiate a ViewPager2 and a PagerAdapter.
         viewPager = findViewById(R.id.pager)
 
         // The pager adapter, which provides the pages to the view pager widget.
-        viewPager.adapter = ScreenSlidePagerAdapter(imagesList)
+        viewPager.adapter = ScreenSlidePagerAdapter(imagesViewModel)
         viewPager.setPageTransformer(ZoomOutPageTransformer())
         //viewPager.setCurrentItem(2, false)
     }

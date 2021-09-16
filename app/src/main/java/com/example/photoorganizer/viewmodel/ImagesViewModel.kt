@@ -15,11 +15,6 @@ class ImagesViewModel : ViewModel() {
         filesListLiveData.value = ImagesRepository.getFilesListDirectoriesFirst(ImagesRepository.fetchAllFilesByDate(directory))
     }
 
-    /*fun changeFolder(newFolder: File?) {
-        imageListLiveData.value = ImagesRepository.fetchAllFilesByDate(newFolder)
-    }*/
-
-
     fun getFilesByDate(rootFile: File?, desc: Boolean = false) {
         filesListLiveData.value = ImagesRepository.fetchAllFilesByDate(rootFile, desc)
     }
@@ -28,9 +23,13 @@ class ImagesViewModel : ViewModel() {
         imagesListLiveData.value = ImagesRepository.getListOfImagesOnly(ImagesRepository.fetchAllFilesByDate(directory))
     }
 
-    fun setRootDir(root: File) {
+    fun setRootDir(root: File?) {
         rootDirLiveData.value = root
         updateFiles(root)
+    }
+
+    fun refreshFiles() {
+        updateFiles(rootDirLiveData.value)
     }
 
     fun getCurrentRoot() : File? = rootDirLiveData.value

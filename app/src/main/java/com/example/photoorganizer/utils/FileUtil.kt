@@ -31,7 +31,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
 
     @SuppressLint("SimpleDateFormat")
     @Throws(IOException::class)
-    fun createImageFile(dir: File): File {
+    fun createImageFile(dir: File?): File {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmssss").format(Date())
         return File.createTempFile(
@@ -45,9 +45,9 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
-    private fun createNewDirectory(name: String, dir: File): File {
+    private fun createNewDirectory(name: String, dir: File?): File {
         return File(
-            "${dir.path}${File.separator}$name"
+            "${dir?.path}${File.separator}$name"
         ).apply {
             Timber.tag(DEBUG_TAG).d("Creating new directory: '$name'")
             mkdir()
@@ -55,7 +55,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
-    private fun doesFileAlreadyExists(neFileName: String, dir: File) : Boolean{
+    private fun doesFileAlreadyExists(neFileName: String, dir: File?) : Boolean{
         ImagesRepository.fetchAllFilesByDate(dir).also {
             it?.forEach { file ->
                 if (file.name.equals(neFileName, ignoreCase = true)) return true
@@ -65,7 +65,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
     }
 
     @SuppressLint("QueryPermissionsNeeded")
-    fun dispatchTakePictureIntent(dir: File) {
+    fun dispatchTakePictureIntent(dir: File?) {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(context.packageManager)?.also {
@@ -111,7 +111,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
 
 
     @SuppressLint("InflateParams")
-    fun showNewFolderAlert(vm: ImagesViewModel, dir: File) {
+    fun showNewFolderAlert(vm: ImagesViewModel, dir: File?) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.edit_text_custom_alert, null)
 

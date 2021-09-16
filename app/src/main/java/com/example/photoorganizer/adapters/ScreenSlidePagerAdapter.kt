@@ -7,10 +7,11 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
+import com.example.photoorganizer.viewmodel.ImagesViewModel
 import java.io.File
 
-class ScreenSlidePagerAdapter(private val imagesList: Array<out File>) : RecyclerView.Adapter<ScreenSlidePagerAdapter.PageViewHolder>(){
-    override fun getItemCount(): Int = imagesList.size
+class ScreenSlidePagerAdapter(private val viewModel: ImagesViewModel) : RecyclerView.Adapter<ScreenSlidePagerAdapter.PageViewHolder>(){
+    override fun getItemCount(): Int = viewModel.imagesListLiveData.value?.size ?: 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -19,7 +20,7 @@ class ScreenSlidePagerAdapter(private val imagesList: Array<out File>) : Recycle
     }
 
     override fun onBindViewHolder(holder: PageViewHolder, position: Int) {
-        holder.setImage(imagesList[position])
+        viewModel.imagesListLiveData.value?.get(position)?.let { holder.setImage(it) }
     }
 
     inner class PageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
