@@ -33,4 +33,12 @@ class ImagesViewModel : ViewModel() {
     }
 
     fun getCurrentRoot() : File? = rootDirLiveData.value
+
+    companion object {
+        private var instance : ImagesViewModel? = null
+        fun getInstance() =
+            instance ?: synchronized(ImagesViewModel::class.java){
+                instance ?: ImagesViewModel().also { instance = it }
+            }
+    }
 }

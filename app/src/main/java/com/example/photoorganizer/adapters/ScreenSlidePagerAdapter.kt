@@ -11,7 +11,6 @@ import com.example.photoorganizer.viewmodel.ImagesViewModel
 import java.io.File
 
 class ScreenSlidePagerAdapter(private val viewModel: ImagesViewModel) : RecyclerView.Adapter<ScreenSlidePagerAdapter.PageViewHolder>(){
-    override fun getItemCount(): Int = viewModel.imagesListLiveData.value?.size ?: 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -22,6 +21,8 @@ class ScreenSlidePagerAdapter(private val viewModel: ImagesViewModel) : Recycler
     override fun onBindViewHolder(holder: PageViewHolder, position: Int) {
         viewModel.imagesListLiveData.value?.get(position)?.let { holder.setImage(it) }
     }
+
+    override fun getItemCount(): Int = viewModel.imagesListLiveData.value?.size ?: 0
 
     inner class PageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val image: ImageView = itemView.findViewById(R.id.ivImagePage)

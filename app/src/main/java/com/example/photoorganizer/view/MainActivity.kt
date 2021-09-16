@@ -8,10 +8,10 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider.getUriForFile
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +23,7 @@ import com.example.photoorganizer.utils.FileUtil
 import com.example.photoorganizer.utils.REQUEST_IMAGE_CAPTURE
 import com.example.photoorganizer.utils.REQUEST_IMAGE_IMPORT
 import com.example.photoorganizer.viewmodel.ImagesViewModel
+import com.example.photoorganizer.viewmodel.ViewModelFactory
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -50,7 +51,8 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
-    private val imagesViewModel: ImagesViewModel by viewModels()
+    //private val imagesViewModel: ImagesViewModel by viewModels()
+    private lateinit var imagesViewModel: ImagesViewModel
     private lateinit var fileUtil: FileUtil
     private lateinit var recyclerView: RecyclerView
     private lateinit var customImageAdapter: CustomImageAdapter
@@ -69,6 +71,8 @@ class MainActivity : AppCompatActivity() {
         fileUtil = FileUtil(this, applicationContext)
 
         rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+
+        imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(ImagesViewModel::class.java)
         imagesViewModel.setRootDir(rootDir)
         //Timber.tag(DEBUG_TAG).d("Root = ${rootDir.path}")
 
