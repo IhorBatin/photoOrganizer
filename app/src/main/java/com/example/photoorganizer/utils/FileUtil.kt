@@ -13,8 +13,11 @@ import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import com.example.photoorganizer.R
+import com.example.photoorganizer.adapters.CustomImageAdapter
+import com.example.photoorganizer.adapters.ScreenSlidePagerAdapter
 import com.example.photoorganizer.ext.toggleErrorMessage
 import com.example.photoorganizer.repository.ImagesRepository
 import com.example.photoorganizer.viewmodel.ImagesViewModel
@@ -106,6 +109,34 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
+    fun dispatchShareImageIntent(image: File) {
+        val uri = FileProvider.getUriForFile(context, context.packageName, image)
+        val intent = ShareCompat.IntentBuilder.from(activity)
+            .setStream(uri) // uri from FileProvider
+            .setType("image/jpeg")
+            .intent
+            .setAction(Intent.ACTION_SEND) //Change if needed
+            .setDataAndType(uri, "image/*")
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        // Using chooser instead of regular intent here as different ways of
+        // sharing images will most likely be used.
+        val chooser: Intent = Intent.createChooser(intent, context.getString(R.string.chooser_title))
+        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Flag so intent can be launched for util class
+        context.startActivity(chooser)
+    }
+
+    fun deleteImageFromImageAdapter(pos: Int, vm: ImagesViewModel, adapter: CustomImageAdapter) {
+        vm.filesListLiveData.value?.get(pos)?.delete()
+        adapter.notifyItemRemoved(pos)
+        vm.refreshFiles()
+    }
+
+    fun deleteImageFromSliderAdapter(pos: Int, vm: ImagesViewModel, adapter: ScreenSlidePagerAdapter) {
+        vm.imagesListLiveData.value?.get(pos)?.delete()
+        adapter.notifyItemRemoved(pos)
+        vm.refreshFiles()
+    }
+
     fun readBytesFromUri(uri: Uri): ByteArray? =
         activity.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
 
@@ -169,6 +200,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         // Important to clear given flags in order for keyboard to show up
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
+
 
     /*fun setImageFromPath(imgFile: String, imageView: ImageView) {
         val pictureBitmap = BitmapFactory.decodeFile(imgFile)

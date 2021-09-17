@@ -13,6 +13,7 @@ class ImagesViewModel : ViewModel() {
     private fun updateFiles(directory: File?) {
         //imageListLiveData.value = ImagesRepository.fetchAllFilesByDate(directory)
         filesListLiveData.value = ImagesRepository.getFilesListDirectoriesFirst(ImagesRepository.fetchAllFilesByDate(directory))
+        imagesListLiveData.value = ImagesRepository.getListOfImagesOnly(ImagesRepository.fetchAllFilesByDate(directory))
     }
 
     fun getFilesByDate(rootFile: File?, desc: Boolean = false) {

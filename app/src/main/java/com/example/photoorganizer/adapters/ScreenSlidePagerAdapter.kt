@@ -11,6 +11,8 @@ import com.example.photoorganizer.viewmodel.ImagesViewModel
 import java.io.File
 
 class ScreenSlidePagerAdapter(private val viewModel: ImagesViewModel) : RecyclerView.Adapter<ScreenSlidePagerAdapter.PageViewHolder>(){
+    var onShareClick: ((Int) -> Unit)? = null
+    var onDeleteClick: ((Int) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -26,6 +28,18 @@ class ScreenSlidePagerAdapter(private val viewModel: ImagesViewModel) : Recycler
 
     inner class PageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val image: ImageView = itemView.findViewById(R.id.ivImagePage)
+        private val imgShare: ImageView = itemView.findViewById(R.id.ivFsShareImage)
+        private val imgDelete: ImageView = itemView.findViewById(R.id.ivFsDeleteImage)
+
+        init {
+            imgShare.setOnClickListener {
+                onShareClick?.invoke(adapterPosition)
+            }
+
+            imgDelete.setOnClickListener {
+                onDeleteClick?.invoke(adapterPosition)
+            }
+        }
 
         fun setImage(file: File) {
             Glide

@@ -53,9 +53,9 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
 
         fun setImageForFile(file: File) {
             if (file.isDirectory) {
-               itemView.findViewById<TextView>(R.id.tvDirTitle).let {
-                   it.visibility = View.VISIBLE
-                   it.text = file.name
+                itemView.findViewById<TextView>(R.id.tvDirTitle).let {
+                    it.visibility = View.VISIBLE
+                    it.text = file.name
                 }
                 image.setBackgroundColor(Color.TRANSPARENT)
                 Glide

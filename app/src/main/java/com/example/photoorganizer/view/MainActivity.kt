@@ -1,7 +1,6 @@
 package com.example.photoorganizer.view
 
 import android.content.Intent
-import android.content.Intent.*
 import android.os.Bundle
 import android.os.Environment
 import android.view.Menu
@@ -9,8 +8,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ShareCompat
-import androidx.core.content.FileProvider.getUriForFile
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
@@ -192,27 +189,17 @@ class MainActivity : AppCompatActivity() {
         toggleImageLongClickOptions(true)
 
         bundledMainActivity.ivDeleteImage.setOnClickListener {
-            image.delete()
-            imagesViewModel.refreshFiles()
-            customImageAdapter.notifyItemRemoved(pos)
+            fileUtil.deleteImageFromImageAdapter(pos, imagesViewModel, customImageAdapter)
+
+            //image.delete()
+            //imagesViewModel.refreshFiles()
+            //customImageAdapter.notifyItemRemoved(pos)
 
             toggleImageLongClickOptions(false)
         }
 
         bundledMainActivity.ivShareImage.setOnClickListener {
-            val uri = getUriForFile(this, packageName, image)
-            val intent = ShareCompat.IntentBuilder.from(this)
-                .setStream(uri) // uri from FileProvider
-                .setType("image/jpeg")
-                .intent
-                .setAction(ACTION_SEND) //Change if needed
-                .setDataAndType(uri, "image/*")
-                .addFlags(FLAG_GRANT_READ_URI_PERMISSION)
-            // Using chooser instead of regular intent here as different ways of
-            // sharing images will most likely be used.
-            val chooser: Intent = createChooser(intent, getString(R.string.chooser_title))
-            startActivity(chooser)
-
+            fileUtil.dispatchShareImageIntent(image)
             toggleImageLongClickOptions(false)
         }
     }
