@@ -16,7 +16,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
 
     // private var pictureDirectory: Array<File> = viewModel.imageListLiveData.value as Array<File>
     var onImageClick: ((Int) -> Unit)? = null
-    var onImageLongClick: ((File) -> Unit)? = null
+    var onImageLongClick: ((Int) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -42,14 +42,10 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
 
         init {
             image.setOnClickListener {
-                //viewModel.filesListLiveData.value?.get(adapterPosition)?.let { file ->
-                    onImageClick?.invoke(adapterPosition)
-                //}
+                onImageClick?.invoke(adapterPosition)
             }
             image.setOnLongClickListener {
-                viewModel.filesListLiveData.value?.get(adapterPosition)?.let { file ->
-                    onImageLongClick?.invoke(file)
-                }
+                onImageLongClick?.invoke(adapterPosition)
 
                 return@setOnLongClickListener true // Have to return value
             }

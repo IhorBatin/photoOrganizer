@@ -161,15 +161,15 @@ class MainActivity : AppCompatActivity() {
             else handleOnImageClick(position)
         }
 
-        customImageAdapter.onImageLongClick = { file ->
-            Timber.tag(DEBUG_TAG).d("Long Clicked: '${file.name}'")
-            //file.delete()
+        customImageAdapter.onImageLongClick = { position ->
+            val fileLongClicked: File = imagesViewModel.filesListLiveData.value!![position]
+            Timber.tag(DEBUG_TAG).d("Long Clicked: '${fileLongClicked.name}'")
 
-            if (file.isDirectory) {
+            if (fileLongClicked.isDirectory) {
                 // TODO: Handle Directory Options [Delete, Setup Password, Remove Password, ...]
             }
             else {
-                handleOnImageLongClick(file)
+                handleOnImageLongClick(fileLongClicked, position)
             }
         }
     }
@@ -186,13 +186,13 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun handleOnImageLongClick(image: File) {
+    private fun handleOnImageLongClick(image: File, pos: Int) {
         toggleImageLongClickOptions(true)
 
         bundledMainActivity.ivDeleteImage.setOnClickListener {
             image.delete()
             imagesViewModel.refreshFiles()
-            customImageAdapter.notifyDataSetChanged()
+            customImageAdapter.notifyItemRemoved(pos)
 
             toggleImageLongClickOptions(false)
         }
