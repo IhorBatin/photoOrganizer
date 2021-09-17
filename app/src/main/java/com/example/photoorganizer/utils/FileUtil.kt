@@ -12,12 +12,14 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.adapters.ScreenSlidePagerAdapter
+import com.example.photoorganizer.databinding.ActivityMainBinding
 import com.example.photoorganizer.ext.toggleErrorMessage
 import com.example.photoorganizer.repository.ImagesRepository
 import com.example.photoorganizer.viewmodel.ImagesViewModel
@@ -151,11 +153,11 @@ open class FileUtil(private val activity: Activity, private val context: Context
             R.style.ThemeOverlay_App_MaterialAlertDialog
         ).setCancelable(false)
             .setCustomTitle(customView)
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
                 // Respond to negative button press
                 dialog.dismiss()
             }
-            .setPositiveButton("Confirm", null)
+            .setPositiveButton(context.getString(R.string.confirm_text), null)
             .create()
 
         dialog.setOnShowListener {
@@ -172,8 +174,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
                             !doesFileAlreadyExists(newDirName, dir)  and !isTooLong -> {
                         createNewDirectory(newDirName, dir)
                         // Updating RV UI after file is created
-                        //vm.updateFiles(dir)
-                        vm.setRootDir(dir)
+                        vm.refreshFiles()
                         dialog.dismiss()
                     }
                     doesFileAlreadyExists(newDirName, dir) -> {
@@ -195,17 +196,42 @@ open class FileUtil(private val activity: Activity, private val context: Context
             }
         }
 
-
         dialog.show()
         // Important to clear given flags in order for keyboard to show up
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
+    fun showDeleteDirectoryAlert(vm: ImagesViewModel, dir: File, binding: ActivityMainBinding) {
+        val dialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        ).setTitle(context.getString(R.string.Delete_FolderText))
+            .setNegativeButton(context.getString(R.string.delete_text)) { dialog, _ ->
+                // Deleting Directory
+                if (!dir.deleteRecursively()) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.Error_SomethingWrong),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                dialog.dismiss()
+            }
+            .setPositiveButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.setOnDismissListener {
+            vm.refreshFiles()
+            binding.clDirectoryOptions.visibility = View.GONE
+        }
+
+        dialog.show()
+    }
 
     /*fun setImageFromPath(imgFile: String, imageView: ImageView) {
         val pictureBitmap = BitmapFactory.decodeFile(imgFile)
         imageView.setImageBitmap(pictureBitmap)
     }*/
 }
-
-

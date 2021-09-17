@@ -4,7 +4,6 @@ package com.example.photoorganizer
 
 /** Tasks **/
 // TODO: Add ability to share & delete multiple images from list
-// TODO: Add ability to delete whole directories
 
 /** Fixes and Bugs */
 // TODO: Clean nup logic code in activity and view model before proceeding with ViewPage

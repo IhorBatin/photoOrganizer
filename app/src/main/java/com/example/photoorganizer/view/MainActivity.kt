@@ -117,8 +117,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (bundledMainActivity.clImageOptions.isShown) {
+        if (bundledMainActivity.clImageOptions.isShown ||
+                bundledMainActivity.clDirectoryOptions.isShown) {
             toggleImageLongClickOptions(false)
+            toggleDirectoryLongClickOptions(false)
             return
         }
         if (imagesViewModel.getCurrentRoot()?.name == Environment.DIRECTORY_PICTURES) {
@@ -152,6 +154,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupRVListeners() {
         customImageAdapter.onImageClick = { position ->
             toggleImageLongClickOptions(false)
+            toggleDirectoryLongClickOptions(false)
             val fileClicked: File = imagesViewModel.filesListLiveData.value!![position]
 
             Timber.tag(DEBUG_TAG).d("Clicked: '${fileClicked.name}'")
@@ -161,11 +164,12 @@ class MainActivity : AppCompatActivity() {
 
         customImageAdapter.onImageLongClick = { position ->
             toggleImageLongClickOptions(false)
+            toggleDirectoryLongClickOptions(false)
             val fileLongClicked: File = imagesViewModel.filesListLiveData.value!![position]
             Timber.tag(DEBUG_TAG).d("Long Clicked: '${fileLongClicked.name}'")
 
             if (fileLongClicked.isDirectory) {
-                // TODO: Handle Directory Options [Delete, Setup Password, Remove Password, ...]
+                handleOnDirectoryLongClick(fileLongClicked, position)
             }
             else {
                 handleOnImageLongClick(fileLongClicked, position)
@@ -187,14 +191,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleOnImageLongClick(image: File, pos: Int) {
         toggleImageLongClickOptions(true)
+        toggleDirectoryLongClickOptions(false)
 
         bundledMainActivity.ivDeleteImage.setOnClickListener {
             fileUtil.deleteImageFromImageAdapter(pos, imagesViewModel, customImageAdapter)
-
-            //image.delete()
-            //imagesViewModel.refreshFiles()
-            //customImageAdapter.notifyItemRemoved(pos)
-
             toggleImageLongClickOptions(false)
         }
 
@@ -205,15 +205,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleOnDirectoryClick(dir: File) {
-        //rootDir = dir
+        toggleImageLongClickOptions(false)
+        toggleDirectoryLongClickOptions(false)
         imagesViewModel.setRootDir(dir)
         imagesViewModel.getFilesByDate(imagesViewModel.getCurrentRoot())
         Timber.tag(DEBUG_TAG).d("New root = ${imagesViewModel.getCurrentRoot()?.path}")
         Timber.tag(DEBUG_TAG).d(" Contains files = ${imagesViewModel.getCurrentRoot()?.listFiles()?.size}")
     }
 
+    private fun handleOnDirectoryLongClick(dir: File, pos: Int) {
+        toggleImageLongClickOptions(false)
+        toggleDirectoryLongClickOptions(true)
+
+        bundledMainActivity.ivDeleteDirectory.setOnClickListener {
+            fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir, bundledMainActivity)
+        }
+    }
+
     private fun toggleImageLongClickOptions(showOptions: Boolean) {
         bundledMainActivity.clImageOptions.visibility = if (showOptions) View.VISIBLE else View.GONE
+    }
+
+    private fun toggleDirectoryLongClickOptions(showOptions: Boolean) {
+        bundledMainActivity.clDirectoryOptions.visibility = if (showOptions) View.VISIBLE else View.GONE
     }
 
     /**
