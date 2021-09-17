@@ -18,10 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
-import com.example.photoorganizer.utils.DEBUG_TAG
-import com.example.photoorganizer.utils.FileUtil
-import com.example.photoorganizer.utils.REQUEST_IMAGE_CAPTURE
-import com.example.photoorganizer.utils.REQUEST_IMAGE_IMPORT
+import com.example.photoorganizer.utils.*
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.example.photoorganizer.viewmodel.ViewModelFactory
 import timber.log.Timber
@@ -33,25 +30,8 @@ import java.io.IOException
 
 // RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
 
-// TODO: Share & Delete single image from list or fullscreen view
-// TODO: Add fullscreen image view[started]
-// TODO: Add ability to share multiple images
-// TODO: Add ability to delete image / multiple images
-
-/** Fixes and Bugs */
-// TODO: Clean nup logic code in activity and view model before proceeding with ViewPager
-// TODO: Fix directory being able to share same as regular image file
-// TODO: Fix when screen rotated returns back to home directory
-
-/** Future Plans/Features */
-// TODO: Add locking app and specific folder feature [use ext functions on File obj to to do this]
-// TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
-// TODO: When Navigated to folder update its name in toolbar instead of app name
-// TODO: apply default picture for folder. OR add ability to choose folder color.
-
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
-    //private val imagesViewModel: ImagesViewModel by viewModels()
     private lateinit var imagesViewModel: ImagesViewModel
     private lateinit var fileUtil: FileUtil
     private lateinit var recyclerView: RecyclerView
@@ -173,10 +153,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRVListeners() {
-        customImageAdapter.onImageClick = { file ->
-            Timber.tag(DEBUG_TAG).d("Clicked: '${file.name}'")
-            if (file.isDirectory) handleOnDirectoryClick(file)
-            else handleOnImageClick(file)
+        customImageAdapter.onImageClick = { position ->
+            val fileClicked: File = imagesViewModel.filesListLiveData.value!![position]
+
+            Timber.tag(DEBUG_TAG).d("Clicked: '${fileClicked.name}'")
+            if (fileClicked.isDirectory) handleOnDirectoryClick(fileClicked)
+            else handleOnImageClick(position)
         }
 
         customImageAdapter.onImageLongClick = { file ->
@@ -192,8 +174,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleOnImageClick(image: File) {
-        startActivity(Intent(this, ScreenSlidePagerActivity::class.java))
+    private fun handleOnImageClick(clickPosition: Int) {
+        startActivity(
+            Intent(
+                this,
+                ScreenSlidePagerActivity::class.java
+            ).putExtra(
+                OPEN_AT_POS,
+                imagesViewModel.gtePositionForImageSlider(clickPosition)
+            )
+        )
     }
 
     private fun handleOnImageLongClick(image: File) {

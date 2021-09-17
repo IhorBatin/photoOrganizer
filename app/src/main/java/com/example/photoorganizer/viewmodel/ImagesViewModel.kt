@@ -34,6 +34,10 @@ class ImagesViewModel : ViewModel() {
 
     fun getCurrentRoot() : File? = rootDirLiveData.value
 
+    fun gtePositionForImageSlider(clickPosition: Int) : Int {
+        return ImagesRepository.getImagePositionIgnoringDirectories(clickPosition, getCurrentRoot())
+    }
+
     companion object {
         private var instance : ImagesViewModel? = null
         fun getInstance() =

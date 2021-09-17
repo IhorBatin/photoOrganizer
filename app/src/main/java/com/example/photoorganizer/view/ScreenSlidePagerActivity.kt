@@ -1,24 +1,23 @@
 package com.example.photoorganizer.view
 
 import android.os.Bundle
-import android.os.Environment
-import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.ScreenSlidePagerAdapter
 import com.example.photoorganizer.utils.DEBUG_TAG
+import com.example.photoorganizer.utils.OPEN_AT_POS
 import com.example.photoorganizer.utils.ZoomOutPageTransformer
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.example.photoorganizer.viewmodel.ViewModelFactory
 import timber.log.Timber
-import java.io.File
 
 class ScreenSlidePagerActivity : FragmentActivity() {
 
     private lateinit var imagesViewModel: ImagesViewModel
     private lateinit var viewPager: ViewPager2
+    private var openImageAtPosition: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +28,8 @@ class ScreenSlidePagerActivity : FragmentActivity() {
         Timber.tag(DEBUG_TAG).d("*** Image Slider")
         Timber.tag(DEBUG_TAG).d("Root Directory: ${imagesViewModel.rootDirLiveData.value?.name}")
         Timber.tag(DEBUG_TAG).d("Num Images: ${imagesViewModel.imagesListLiveData.value?.size}")
+
+        openImageAtPosition = intent.getIntExtra(OPEN_AT_POS, 0)
 
         setupObservers()
         setupViewPager()
@@ -49,6 +50,6 @@ class ScreenSlidePagerActivity : FragmentActivity() {
         // The pager adapter, which provides the pages to the view pager widget.
         viewPager.adapter = ScreenSlidePagerAdapter(imagesViewModel)
         viewPager.setPageTransformer(ZoomOutPageTransformer())
-        //viewPager.setCurrentItem(2, false)
+        viewPager.setCurrentItem(openImageAtPosition, false)
     }
 }

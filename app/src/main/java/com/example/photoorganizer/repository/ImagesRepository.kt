@@ -54,4 +54,12 @@ object ImagesRepository {
         return picturesList.toTypedArray()
     }
 
+    fun getImagePositionIgnoringDirectories(clickPosition: Int, dir: File?): Int {
+        var numOfDirs = 0
+        fetchAllFilesFromDir(dir)?.forEach {
+            if (it.isDirectory) numOfDirs++
+        }
+        return clickPosition - numOfDirs
+    }
+
 }
