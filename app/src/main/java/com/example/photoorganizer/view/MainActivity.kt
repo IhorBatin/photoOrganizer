@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (bundledMainActivity.vImageOptions.isShown) {
+        if (bundledMainActivity.clImageOptions.isShown) {
             toggleImageLongClickOptions(false)
             return
         }
@@ -154,6 +154,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRVListeners() {
         customImageAdapter.onImageClick = { position ->
+            toggleImageLongClickOptions(false)
             val fileClicked: File = imagesViewModel.filesListLiveData.value!![position]
 
             Timber.tag(DEBUG_TAG).d("Clicked: '${fileClicked.name}'")
@@ -162,6 +163,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         customImageAdapter.onImageLongClick = { position ->
+            toggleImageLongClickOptions(false)
             val fileLongClicked: File = imagesViewModel.filesListLiveData.value!![position]
             Timber.tag(DEBUG_TAG).d("Long Clicked: '${fileLongClicked.name}'")
 
@@ -224,7 +226,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun toggleImageLongClickOptions(showOptions: Boolean) {
-        bundledMainActivity.vImageOptions.visibility = if (showOptions) View.VISIBLE else View.GONE
+        bundledMainActivity.clImageOptions.visibility = if (showOptions) View.VISIBLE else View.GONE
     }
 
     /**

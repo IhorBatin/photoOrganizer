@@ -10,7 +10,6 @@ package com.example.photoorganizer
 // TODO: Clean nup logic code in activity and view model before proceeding with ViewPage
 // TODO: Fix when screen rotated returns back to home directory
 // TODO: Fix folder names text color for dark mode
-// TODO: Fix delete/share menu overlapping bottom images, add some shown from bottom animation
 
 /** Future Plans/Features */
 // TODO: Add locking app and specific folder feature [use ext functions on File obj to to do this]
