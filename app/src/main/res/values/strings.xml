@@ -3,4 +3,10 @@
     <string name="Error_FileAlreadyExists">Filename Already Exists</string>
     <string name="Error_IllegalFileName">Illegal characters used</string>
     <string name="Error_FileNameTooLong">Filename is too long</string>
+    <string name="Error_SomethingWrong">Something went wrong</string>
+    <string name="Delete_FolderText">Are you sure want delete all files in this folder?</string>
+    <string name="chooser_title">Share this image with </string>
+    <string name="cancel_text">Cancel</string>
+    <string name="delete_text">Delete</string>
+    <string name="confirm_text">Confirm</string>
 </resources>

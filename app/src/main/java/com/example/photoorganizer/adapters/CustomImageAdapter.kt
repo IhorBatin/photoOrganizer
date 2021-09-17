@@ -10,14 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
 import com.example.photoorganizer.viewmodel.ImagesViewModel
-import kotlinx.android.synthetic.main.item_image_holder.view.*
 import java.io.File
 
 class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.Adapter<CustomImageAdapter.ImageViewHolder>() {
 
     // private var pictureDirectory: Array<File> = viewModel.imageListLiveData.value as Array<File>
-    var onImageClick: ((File) -> Unit)? = null
-    var onImageLongClick: ((File) -> Unit)? = null
+    var onImageClick: ((Int) -> Unit)? = null
+    var onImageLongClick: ((Int) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -26,11 +25,11 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        viewModel.imageListLiveData.value?.get(position)?.let { holder.setImageForFile(it) }
+        viewModel.filesListLiveData.value?.get(position)?.let { holder.setImageForFile(it) }
     }
 
     override fun getItemCount(): Int {
-        return viewModel.imageListLiveData.value?.size ?: 0
+        return viewModel.filesListLiveData.value?.size ?: 0
     }
 
 /*    fun updateImagesList() {
@@ -39,18 +38,14 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
     }*/
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val image: ImageView = itemView.ivImageHolder
+        private val image: ImageView = itemView.findViewById(R.id.ivImageHolder)
 
         init {
             image.setOnClickListener {
-                viewModel.imageListLiveData.value?.get(adapterPosition)?.let { file ->
-                    onImageClick?.invoke(file)
-                }
+                onImageClick?.invoke(adapterPosition)
             }
             image.setOnLongClickListener {
-                viewModel.imageListLiveData.value?.get(adapterPosition)?.let { file ->
-                    onImageLongClick?.invoke(file)
-                }
+                onImageLongClick?.invoke(adapterPosition)
 
                 return@setOnLongClickListener true // Have to return value
             }
@@ -58,9 +53,9 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
 
         fun setImageForFile(file: File) {
             if (file.isDirectory) {
-               itemView.tvDirTitle.let {
-                   it.visibility = View.VISIBLE
-                   it.text = file.name
+                itemView.findViewById<TextView>(R.id.tvDirTitle).let {
+                    it.visibility = View.VISIBLE
+                    it.text = file.name
                 }
                 image.setBackgroundColor(Color.TRANSPARENT)
                 Glide
@@ -69,7 +64,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
                     .into(image)
             }
             else {
-                itemView.tvDirTitle.visibility = View.GONE
+                itemView.findViewById<TextView>(R.id.tvDirTitle).visibility = View.GONE
                 Glide
                     .with(image.context)
                     .load(file)

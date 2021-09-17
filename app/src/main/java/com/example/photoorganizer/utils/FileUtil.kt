@@ -5,19 +5,21 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Environment
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import com.example.photoorganizer.R
+import com.example.photoorganizer.adapters.CustomImageAdapter
+import com.example.photoorganizer.adapters.ScreenSlidePagerAdapter
+import com.example.photoorganizer.databinding.ActivityMainBinding
 import com.example.photoorganizer.ext.toggleErrorMessage
 import com.example.photoorganizer.repository.ImagesRepository
 import com.example.photoorganizer.viewmodel.ImagesViewModel
@@ -34,34 +36,32 @@ open class FileUtil(private val activity: Activity, private val context: Context
 
     @SuppressLint("SimpleDateFormat")
     @Throws(IOException::class)
-    fun createImageFile(): File {
+    fun createImageFile(dir: File?): File {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmssss").format(Date())
-        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "JPEG_${timeStamp}_", /* prefix */
             ".jpg", /* suffix */
-            storageDir /* directory */
+            dir /* directory */
         ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
+            // Save a file: path for use with intents
             currentPhotoPath = absolutePath
-            Timber.tag(DEBUG_TAG).d("photoPath -> $currentPhotoPath")
+            //Timber.tag(DEBUG_TAG).d("new photoPath -> $currentPhotoPath")
         }
     }
 
-    private fun createNewDirectory(name: String): File {
+    private fun createNewDirectory(name: String, dir: File?): File {
         return File(
-            "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)}${File.separator}$name"
+            "${dir?.path}${File.separator}$name"
         ).apply {
             Timber.tag(DEBUG_TAG).d("Creating new directory: '$name'")
             mkdir()
+            Timber.tag(DEBUG_TAG).d("New folder: '${this.path}' -> created")
         }
     }
 
-    private fun doesFileAlreadyExists(neFileName: String) : Boolean{
-        ImagesRepository.fetchAllFilesByDate(
-            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        ).also {
+    private fun doesFileAlreadyExists(neFileName: String, dir: File?) : Boolean{
+        ImagesRepository.fetchAllFilesByDate(dir).also {
             it?.forEach { file ->
                 if (file.name.equals(neFileName, ignoreCase = true)) return true
             }
@@ -69,14 +69,16 @@ open class FileUtil(private val activity: Activity, private val context: Context
         return false
     }
 
-    fun dispatchTakePictureIntent() {
+    @SuppressLint("QueryPermissionsNeeded")
+    fun dispatchTakePictureIntent(dir: File?) {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(context.packageManager)?.also {
                 // Create the File where the photo should go
                 val photoFile: File? = try {
-                    createImageFile()
+                    createImageFile(dir)
                 } catch (ex: IOException) {
+                    Timber.tag(DEBUG_TAG).e("Exception Caught ${ex.message}")
                     // Error occurred while creating the File
                     null
                 }
@@ -109,16 +111,40 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
+    fun dispatchShareImageIntent(image: File) {
+        val uri = FileProvider.getUriForFile(context, context.packageName, image)
+        val intent = ShareCompat.IntentBuilder.from(activity)
+            .setStream(uri) // uri from FileProvider
+            .setType("image/jpeg")
+            .intent
+            .setAction(Intent.ACTION_SEND) //Change if needed
+            .setDataAndType(uri, "image/*")
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        // Using chooser instead of regular intent here as different ways of
+        // sharing images will most likely be used.
+        val chooser: Intent = Intent.createChooser(intent, context.getString(R.string.chooser_title))
+        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Flag so intent can be launched for util class
+        context.startActivity(chooser)
+    }
+
+    fun deleteImageFromImageAdapter(pos: Int, vm: ImagesViewModel, adapter: CustomImageAdapter) {
+        vm.filesListLiveData.value?.get(pos)?.delete()
+        adapter.notifyItemRemoved(pos)
+        vm.refreshFiles()
+    }
+
+    fun deleteImageFromSliderAdapter(pos: Int, vm: ImagesViewModel, adapter: ScreenSlidePagerAdapter) {
+        vm.imagesListLiveData.value?.get(pos)?.delete()
+        adapter.notifyItemRemoved(pos)
+        vm.refreshFiles()
+    }
+
     fun readBytesFromUri(uri: Uri): ByteArray? =
         activity.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
 
-    fun setImageFromPath(imgFile: String, imageView: ImageView) {
-        val pictureBitmap = BitmapFactory.decodeFile(imgFile)
-        imageView.setImageBitmap(pictureBitmap)
-    }
 
     @SuppressLint("InflateParams")
-    fun showNewFolderAlert(vm: ImagesViewModel, file: File?) {
+    fun showNewFolderAlert(vm: ImagesViewModel, dir: File?) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.edit_text_custom_alert, null)
 
@@ -127,14 +153,14 @@ open class FileUtil(private val activity: Activity, private val context: Context
             R.style.ThemeOverlay_App_MaterialAlertDialog
         ).setCancelable(false)
             .setCustomTitle(customView)
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
                 // Respond to negative button press
                 dialog.dismiss()
             }
-            .setPositiveButton("Confirm", null)
+            .setPositiveButton(context.getString(R.string.confirm_text), null)
             .create()
 
-        dialog.setOnShowListener() {
+        dialog.setOnShowListener {
             val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
 
             positiveBtn.setOnClickListener {
@@ -145,13 +171,13 @@ open class FileUtil(private val activity: Activity, private val context: Context
 
                 when {
                     newDirName.isNotBlank() and isAlphaNumeric and
-                            !doesFileAlreadyExists(newDirName)  and !isTooLong -> {
-                        createNewDirectory(newDirName)
+                            !doesFileAlreadyExists(newDirName, dir)  and !isTooLong -> {
+                        createNewDirectory(newDirName, dir)
                         // Updating RV UI after file is created
-                        vm.updateFiles(file)
+                        vm.refreshFiles()
                         dialog.dismiss()
                     }
-                    doesFileAlreadyExists(newDirName) -> {
+                    doesFileAlreadyExists(newDirName, dir) -> {
                         Timber.tag(DEBUG_TAG).d(context.getString(R.string.Error_FileAlreadyExists))
                         customView.findViewById<TextView>(R.id.tvErrorMessage)
                             .toggleErrorMessage(R.string.Error_FileAlreadyExists)
@@ -170,11 +196,42 @@ open class FileUtil(private val activity: Activity, private val context: Context
             }
         }
 
-
         dialog.show()
         // Important to clear given flags in order for keyboard to show up
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
+
+    fun showDeleteDirectoryAlert(vm: ImagesViewModel, dir: File, binding: ActivityMainBinding) {
+        val dialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        ).setTitle(context.getString(R.string.Delete_FolderText))
+            .setNegativeButton(context.getString(R.string.delete_text)) { dialog, _ ->
+                // Deleting Directory
+                if (!dir.deleteRecursively()) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.Error_SomethingWrong),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                dialog.dismiss()
+            }
+            .setPositiveButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.setOnDismissListener {
+            vm.refreshFiles()
+            binding.clDirectoryOptions.visibility = View.GONE
+        }
+
+        dialog.show()
+    }
+
+    /*fun setImageFromPath(imgFile: String, imageView: ImageView) {
+        val pictureBitmap = BitmapFactory.decodeFile(imgFile)
+        imageView.setImageBitmap(pictureBitmap)
+    }*/
 }
-
-

@@ -1,30 +1,23 @@
 package com.example.photoorganizer.view
 
 import android.content.Intent
-import android.content.Intent.ACTION_SEND
-import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Bundle
 import android.os.Environment
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.activity.viewModels
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ShareCompat
-import androidx.core.content.FileProvider.getUriForFile
-import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
-import com.example.photoorganizer.utils.DEBUG_TAG
-import com.example.photoorganizer.utils.FileUtil
-import com.example.photoorganizer.utils.REQUEST_IMAGE_CAPTURE
-import com.example.photoorganizer.utils.REQUEST_IMAGE_IMPORT
+import com.example.photoorganizer.utils.*
 import com.example.photoorganizer.viewmodel.ImagesViewModel
-import kotlinx.android.synthetic.main.activity_main.*
+import com.example.photoorganizer.viewmodel.ViewModelFactory
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -34,27 +27,14 @@ import java.io.IOException
 
 // RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
 
-// TODO: Add fullscreen image view
-// TODO: Add ability to share multiple images
-// TODO: Add ability to delete image / multiple images
-
-/** Fixes and Bugs */
-// TODO: Fix directory being able to share same as regular image file
-
-/** Future Plans/Features */
-// TODO: Add locking app and specific folder feature
-// TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
-// TODO: When Navigated to folder update its name in toolbar instead of app name
-// TODO: apply default picture for folder.
-
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
-    private val imagesViewModel: ImagesViewModel by viewModels()
+    private lateinit var imagesViewModel: ImagesViewModel
     private lateinit var fileUtil: FileUtil
     private lateinit var recyclerView: RecyclerView
     private lateinit var customImageAdapter: CustomImageAdapter
 
-    private var root: File? = null
+    private lateinit var rootDir: File
     private var spanCount = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,24 +47,20 @@ class MainActivity : AppCompatActivity() {
 
         fileUtil = FileUtil(this, applicationContext)
 
-        root = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        imagesViewModel.getFilesByDate(root)
+        rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+
+        imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(ImagesViewModel::class.java)
+        imagesViewModel.setRootDir(rootDir)
+        //Timber.tag(DEBUG_TAG).d("Root = ${rootDir.path}")
 
         setupObservers()
         setupRecyclerView()
-
-        /*btnTest.setOnClickListener {
-            fileUtil.dispatchTakePictureIntent()
-        }*/
-
-        /*btnImport.setOnClickListener{
-            fileUtil.dispatchImportImagesIntent()
-        }*/
     }
 
     override fun onResume() {
         super.onResume()
-        imagesViewModel.updateFiles(root)
+        //imagesViewModel.updateFiles(rootDir)
+        imagesViewModel.setRootDir(imagesViewModel.getCurrentRoot())
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -112,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleTakePhotoClick() {
-        fileUtil.dispatchTakePictureIntent()
+        fileUtil.dispatchTakePictureIntent(imagesViewModel.getCurrentRoot())
     }
 
     private fun handleImportPhotoClick() {
@@ -121,7 +97,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleCreateNewFolderClick() {
         //val newFile = fileUtil.createNewDirectory("testing5")
-        fileUtil.showNewFolderAlert(imagesViewModel, root)
+        fileUtil.showNewFolderAlert(imagesViewModel, imagesViewModel.getCurrentRoot())
         //Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
         //imagesViewModel.updateFiles(root)
     }
@@ -130,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         //imagesViewModel.getFilesByDate(root)
 
-        val files =  imagesViewModel.imageListLiveData.value
+        val files =  imagesViewModel.filesListLiveData.value
         files?.forEach { file ->
             //Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
             //Timber.tag(DEBUG_TAG).d(" \\_canRead= ${file.canRead()} | freeSpace= ${file.freeSpace}")
@@ -140,17 +116,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        if (bundledMainActivity.clImageOptions.isShown ||
+                bundledMainActivity.clDirectoryOptions.isShown) {
+            toggleImageLongClickOptions(false)
+            toggleDirectoryLongClickOptions(false)
+            return
+        }
+        if (imagesViewModel.getCurrentRoot()?.name == Environment.DIRECTORY_PICTURES) {
+            super.onBackPressed()
+        }
+        else {
+            imagesViewModel.setRootDir(imagesViewModel.getCurrentRoot()?.parentFile)
+        }
+    }
+
     private fun setupObservers() {
-        imagesViewModel.imageListLiveData.observe(this , Observer { imagesList ->
+        imagesViewModel.filesListLiveData.observe(this , { imagesList ->
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
-            //customImageAdapter.updateImagesList()
             customImageAdapter.notifyDataSetChanged()
         })
     }
 
     private fun setupRecyclerView() {
         // Setting RV
-        recyclerView = rvImagesRecycler.apply {
+        recyclerView = bundledMainActivity.rvImagesRecycler.apply {
             customImageAdapter = CustomImageAdapter(imagesViewModel)
             layoutManager = GridLayoutManager(context, spanCount)
             adapter = customImageAdapter
@@ -162,42 +152,83 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRVListeners() {
-        customImageAdapter.onImageClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Clicked: '${image.name}'")
-            //imagesViewModel.updateFiles(root)
+        customImageAdapter.onImageClick = { position ->
+            toggleImageLongClickOptions(false)
+            toggleDirectoryLongClickOptions(false)
+            val fileClicked: File = imagesViewModel.filesListLiveData.value!![position]
+
+            Timber.tag(DEBUG_TAG).d("Clicked: '${fileClicked.name}'")
+            if (fileClicked.isDirectory) handleOnDirectoryClick(fileClicked)
+            else handleOnImageClick(position)
         }
 
-        customImageAdapter.onImageLongClick = { image ->
-            Timber.tag(DEBUG_TAG).d("Long Clicked: '${image.name}'")
-            //image.delete()
-            imagesViewModel.getFilesByDate(root)
-            //customImageAdapter.notifyDataSetChanged()
+        customImageAdapter.onImageLongClick = { position ->
+            toggleImageLongClickOptions(false)
+            toggleDirectoryLongClickOptions(false)
+            val fileLongClicked: File = imagesViewModel.filesListLiveData.value!![position]
+            Timber.tag(DEBUG_TAG).d("Long Clicked: '${fileLongClicked.name}'")
 
-            /** Works but creates temp file in general directory */
-            /*val b = BitmapFactory.decodeFile(image.path)
-            val share = Intent(Intent.ACTION_SEND)
-            share.type = "image/jpeg"
-            val bytes = ByteArrayOutputStream()
-            b.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-            val path = MediaStore.Images.Media.insertImage(contentResolver, b, "Title---", null)
-            val imageUri: Uri = Uri.parse(path)
-            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            share.putExtra(Intent.EXTRA_STREAM, imageUri)
-            startActivity(Intent.createChooser(share, "Select"))*/
-
-            /** Works but weird way of sharing */
-            val uri = getUriForFile(this, packageName, image)
-            val intent = ShareCompat.IntentBuilder.from(this)
-                .setStream(uri) // uri from FileProvider
-                .setType("image/jpeg")
-                .intent
-                .setAction(ACTION_SEND) //Change if needed
-                .setDataAndType(uri, "image/*")
-                .addFlags(FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(intent)
+            if (fileLongClicked.isDirectory) {
+                handleOnDirectoryLongClick(fileLongClicked, position)
+            }
+            else {
+                handleOnImageLongClick(fileLongClicked, position)
+            }
         }
     }
 
+    private fun handleOnImageClick(clickPosition: Int) {
+        startActivity(
+            Intent(
+                this,
+                ScreenSlidePagerActivity::class.java
+            ).putExtra(
+                OPEN_AT_POS,
+                imagesViewModel.gtePositionForImageSlider(clickPosition)
+            )
+        )
+    }
+
+    private fun handleOnImageLongClick(image: File, pos: Int) {
+        toggleImageLongClickOptions(true)
+        toggleDirectoryLongClickOptions(false)
+
+        bundledMainActivity.ivDeleteImage.setOnClickListener {
+            fileUtil.deleteImageFromImageAdapter(pos, imagesViewModel, customImageAdapter)
+            toggleImageLongClickOptions(false)
+        }
+
+        bundledMainActivity.ivShareImage.setOnClickListener {
+            fileUtil.dispatchShareImageIntent(image)
+            toggleImageLongClickOptions(false)
+        }
+    }
+
+    private fun handleOnDirectoryClick(dir: File) {
+        toggleImageLongClickOptions(false)
+        toggleDirectoryLongClickOptions(false)
+        imagesViewModel.setRootDir(dir)
+        imagesViewModel.getFilesByDate(imagesViewModel.getCurrentRoot())
+        Timber.tag(DEBUG_TAG).d("New root = ${imagesViewModel.getCurrentRoot()?.path}")
+        Timber.tag(DEBUG_TAG).d(" Contains files = ${imagesViewModel.getCurrentRoot()?.listFiles()?.size}")
+    }
+
+    private fun handleOnDirectoryLongClick(dir: File, pos: Int) {
+        toggleImageLongClickOptions(false)
+        toggleDirectoryLongClickOptions(true)
+
+        bundledMainActivity.ivDeleteDirectory.setOnClickListener {
+            fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir, bundledMainActivity)
+        }
+    }
+
+    private fun toggleImageLongClickOptions(showOptions: Boolean) {
+        bundledMainActivity.clImageOptions.visibility = if (showOptions) View.VISIBLE else View.GONE
+    }
+
+    private fun toggleDirectoryLongClickOptions(showOptions: Boolean) {
+        bundledMainActivity.clDirectoryOptions.visibility = if (showOptions) View.VISIBLE else View.GONE
+    }
 
     /**
      * Returned image should be coming here if takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
@@ -224,9 +255,9 @@ class MainActivity : AppCompatActivity() {
 
                 for (i in 0 until numOfImports) {
                     val currentImageUri = data.clipData?.getItemAt(i)?.uri
-                    Timber.tag(DEBUG_TAG).e("Import #$i -> $currentImageUri")
+                    Timber.tag(DEBUG_TAG).d("Import #$i -> $currentImageUri")
                     val photoFile: File? = try {
-                        fileUtil.createImageFile()
+                        fileUtil.createImageFile(imagesViewModel.getCurrentRoot())
                     } catch (ex: IOException) {
                         Timber.tag(DEBUG_TAG).d("Error while creating file...")
                         null
@@ -238,9 +269,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        // Updating date in VM
-        imagesViewModel.updateFiles(root)
-        //customImageAdapter.notifyDataSetChanged()
     }
 
 }
