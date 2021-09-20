@@ -123,7 +123,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         // Using chooser instead of regular intent here as different ways of
         // sharing images will most likely be used.
         val chooser: Intent = Intent.createChooser(intent, context.getString(R.string.chooser_title))
-        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Flag so intent can be launched for util class
+        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Flag so intent can be launched from util class
         context.startActivity(chooser)
     }
 
