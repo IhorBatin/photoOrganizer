@@ -22,11 +22,6 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
-// Guide-> https://developer.android.com/training/camera/photobasics
-// https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media
-
-// RecyclerOnClick -> https://stackoverflow.com/questions/24471109/recyclerview-onclick
-
 class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
     private lateinit var imagesViewModel: ImagesViewModel
@@ -41,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         bundledMainActivity = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bundledMainActivity.root)
+        supportActionBar?.title = getString(R.string.home_text)
 
         Timber.plant(Timber.DebugTree())
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
@@ -136,6 +132,10 @@ class MainActivity : AppCompatActivity() {
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
             customImageAdapter.notifyDataSetChanged()
         })
+
+        imagesViewModel.rootDirLiveData.observe(this, {
+            supportActionBar?.title = it.name
+        })
     }
 
     private fun setupRecyclerView() {
@@ -209,7 +209,7 @@ class MainActivity : AppCompatActivity() {
         toggleDirectoryLongClickOptions(false)
         imagesViewModel.setRootDir(dir)
         imagesViewModel.getFilesByDate(imagesViewModel.getCurrentRoot())
-        Timber.tag(DEBUG_TAG).d("New root = ${imagesViewModel.getCurrentRoot()?.path}")
+        Timber.tag(DEBUG_TAG).d("New root = /${imagesViewModel.getCurrentRoot()?.name}")
         Timber.tag(DEBUG_TAG).d(" Contains files = ${imagesViewModel.getCurrentRoot()?.listFiles()?.size}")
     }
 
