@@ -4,9 +4,11 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../layout/custom_preview.xml" value="0.1361111111111111" />
+        <entry key="app/src/main/res/drawable/ic_color_lens.xml" value="0.2222222222222222" />
         <entry key="app/src/main/res/drawable/ic_delete_forever.xml" value="0.21388888888888888" />
         <entry key="app/src/main/res/drawable/ic_folder.xml" value="0.21388888888888888" />
         <entry key="app/src/main/res/drawable/ic_folder_add.xml" value="0.21388888888888888" />
+        <entry key="app/src/main/res/drawable/ic_folder_default.xml" value="0.2222222222222222" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.21388888888888888" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.24456521739130435" />
         <entry key="app/src/main/res/layout/activity_screen_slide.xml" value="0.24139492753623187" />
