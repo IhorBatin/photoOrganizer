@@ -7,7 +7,7 @@ import java.io.File
 
 fun File.getDirectoryColor(activity: Activity) : Int {
     return activity.getPreferences(Context.MODE_PRIVATE)
-        .getInt(this.path, R.color.folder_default)
+        .getInt(this.path, activity.resources.getColor(R.color.folder_default))
 }
 
 fun File.setDirectoryColor(activity: Activity, color: Int) {

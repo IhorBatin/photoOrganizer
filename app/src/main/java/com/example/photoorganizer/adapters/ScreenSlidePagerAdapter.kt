@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
+import com.example.photoorganizer.ext.setViewImage
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import java.io.File
 
@@ -42,10 +42,7 @@ class ScreenSlidePagerAdapter(private val viewModel: ImagesViewModel) : Recycler
         }
 
         fun setImage(file: File) {
-            Glide
-                .with(image.context)
-                .load(file)
-                .into(image)
+            image.setViewImage(file)
         }
     }
 }

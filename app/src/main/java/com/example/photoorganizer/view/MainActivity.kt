@@ -1,6 +1,5 @@
 package com.example.photoorganizer.view
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
@@ -220,6 +219,11 @@ class MainActivity : AppCompatActivity() {
 
         bundledMainActivity.ivDeleteDirectory.setOnClickListener {
             fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir, bundledMainActivity)
+        }
+
+        bundledMainActivity.ivChangeDirColor.setOnClickListener {
+            fileUtil.showChangeDirectoryColorAlert(imagesViewModel, dir)
+            toggleDirectoryLongClickOptions(false)
         }
     }
 
