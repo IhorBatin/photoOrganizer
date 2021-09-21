@@ -70,4 +70,6 @@
         <item name="android:padding">4dp</item>
     </style>
 
+    <color name="folderNameColor">@color/black</color>
+
 </resources>

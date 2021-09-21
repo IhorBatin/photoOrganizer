@@ -4,7 +4,6 @@ package com.example.photoorganizer
 
 /** Tasks **/
 // TODO: Add locking whole app, and specific folder, features [use ext functions on File obj to to do this]
-// TODO: Add ability to change folder color.
 // TODO: Add Notifications
 // TODO: Add Animation to bottom menu
 
@@ -12,7 +11,6 @@ package com.example.photoorganizer
 /** Fixes and Bugs */
 // TODO: Clean nup logic code in activity and view model
 // TODO: Fix when screen rotated returns back to home directory
-// TODO: Fix folder names text color for dark mode
 // TODO: Fix bottom menu icons to be bigger, also add sub-names
 
 /** Future Plans/Features */
