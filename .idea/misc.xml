@@ -4,17 +4,23 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../layout/custom_preview.xml" value="0.1361111111111111" />
+        <entry key="app/src/main/res/drawable/ic_color_lens.xml" value="0.2222222222222222" />
         <entry key="app/src/main/res/drawable/ic_delete_forever.xml" value="0.21388888888888888" />
         <entry key="app/src/main/res/drawable/ic_folder.xml" value="0.21388888888888888" />
         <entry key="app/src/main/res/drawable/ic_folder_add.xml" value="0.21388888888888888" />
+        <entry key="app/src/main/res/drawable/ic_folder_default.xml" value="0.2222222222222222" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.21388888888888888" />
+        <entry key="app/src/main/res/drawable/rounded_corners.xml" value="0.2175925925925926" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.24456521739130435" />
         <entry key="app/src/main/res/layout/activity_screen_slide.xml" value="0.24139492753623187" />
+        <entry key="app/src/main/res/layout/change_folder_color_custom_alert.xml" value="0.23324275362318841" />
+        <entry key="app/src/main/res/layout/color_chooser_item.xml" value="0.2259963768115942" />
         <entry key="app/src/main/res/layout/edit_text_custom_alert.xml" value="0.19701086956521738" />
         <entry key="app/src/main/res/layout/fragment_blank.xml" value="0.24456521739130435" />
         <entry key="app/src/main/res/layout/fragment_full_screen.xml" value="0.15070921985815602" />
         <entry key="app/src/main/res/layout/fragment_screen_slide_page.xml" value="0.24139492753623187" />
         <entry key="app/src/main/res/layout/item_image_holder.xml" value="0.24456521739130435" />
+        <entry key="app/src/main/res/layout/rounded_corners.xml" value="0.2259963768115942" />
       </map>
     </option>
   </component>

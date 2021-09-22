@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "586008414335",
+    "project_id": "photoorganizer-17184",
+    "storage_bucket": "photoorganizer-17184.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586008414335:android:32fedf5289b88b18cd574a",
+        "android_client_info": {
+          "package_name": "com.example.photoorganizer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "586008414335-59k7ufp8bf93qh49ffmdhb77a4g17bcd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMcUkHtDVAFvRjtxaqVtuQCjKqR1CUXN8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "586008414335-59k7ufp8bf93qh49ffmdhb77a4g17bcd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

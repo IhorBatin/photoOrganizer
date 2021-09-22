@@ -5,14 +5,13 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
@@ -20,6 +19,7 @@ import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.adapters.ScreenSlidePagerAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
+import com.example.photoorganizer.ext.setDirectoryColor
 import com.example.photoorganizer.ext.toggleErrorMessage
 import com.example.photoorganizer.repository.ImagesRepository
 import com.example.photoorganizer.viewmodel.ImagesViewModel
@@ -230,8 +230,67 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.show()
     }
 
-    /*fun setImageFromPath(imgFile: String, imageView: ImageView) {
-        val pictureBitmap = BitmapFactory.decodeFile(imgFile)
-        imageView.setImageBitmap(pictureBitmap)
-    }*/
+    fun showChangeDirectoryColorAlert(vm: ImagesViewModel, dir: File) {
+        val layoutInflater = LayoutInflater.from(context)
+        val customView: View = layoutInflater.inflate(R.layout.change_folder_color_custom_alert, null)
+
+        val dialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        ).setCancelable(true)
+            .setCustomTitle(customView)
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            setupColorChangeListeners(customView, dir, dialog)
+        }
+
+        dialog.setOnDismissListener {
+            vm.refreshFiles()
+        }
+
+        dialog.show()
+    }
+
+    private fun getViewColor(view: View) : Int =
+        (view.background as ColorDrawable).color
+
+    private fun setupColorChangeListeners(customView: View, dir: File, dialog: androidx.appcompat.app.AlertDialog) {
+        customView.findViewById<View>(R.id.colorDefault).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorYellow).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorOrange).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorGreen).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorTeal).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorBrown).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorBlue).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorRed).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+    }
+
 }

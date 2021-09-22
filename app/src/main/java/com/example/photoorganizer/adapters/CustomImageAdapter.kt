@@ -1,5 +1,6 @@
 package com.example.photoorganizer.adapters
 
+import android.app.Activity
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -7,14 +8,15 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.photoorganizer.R
+import com.example.photoorganizer.ext.getDirectoryColor
+import com.example.photoorganizer.ext.setDefaultFolderImage
+import com.example.photoorganizer.ext.setViewImage
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import java.io.File
 
 class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.Adapter<CustomImageAdapter.ImageViewHolder>() {
 
-    // private var pictureDirectory: Array<File> = viewModel.imageListLiveData.value as Array<File>
     var onImageClick: ((Int) -> Unit)? = null
     var onImageLongClick: ((Int) -> Unit)? = null
 
@@ -58,18 +60,12 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
                     it.text = file.name
                 }
                 image.setBackgroundColor(Color.TRANSPARENT)
-                Glide
-                    .with(image.context)
-                    .load(R.drawable.ic_folder)
-                    .into(image)
+                image.setDefaultFolderImage()
+                image.setColorFilter(file.getDirectoryColor(image.context as Activity))
             }
             else {
                 itemView.findViewById<TextView>(R.id.tvDirTitle).visibility = View.GONE
-                Glide
-                    .with(image.context)
-                    .load(file)
-                    .centerCrop()
-                    .into(image)
+                image.setViewImage(file)
             }
         }
 
