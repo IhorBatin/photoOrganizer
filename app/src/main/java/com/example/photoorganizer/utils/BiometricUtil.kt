@@ -17,6 +17,7 @@ import androidx.biometric.BiometricPrompt.PromptInfo
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.photoorganizer.R
+import com.example.photoorganizer.ext.clearDirectoryBiometricLock
 import com.example.photoorganizer.ext.setDirectoryBiometricLocked
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -89,7 +90,7 @@ class BiometricUtil(private val context: Context) {
                             vm.refreshFiles()
                         }
                         PromptType.DELETE -> {
-                            dir.setDirectoryBiometricLocked(context, false)
+                            dir.clearDirectoryBiometricLock(context)
                             vm.refreshFiles()
                         }
                     }

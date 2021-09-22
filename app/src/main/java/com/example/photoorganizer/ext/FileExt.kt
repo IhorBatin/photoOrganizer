@@ -70,3 +70,12 @@ fun File.setDirectoryBiometricLocked(activity: Activity, locked: Boolean) {
         apply()
     }
 }
+
+fun File.clearDirectoryBiometricLock(activity: Activity) {
+    val key = this.path + SP_BIO_LOCK
+    activity.getPreferences(Context.MODE_PRIVATE)
+    with (activity.getPreferences(Context.MODE_PRIVATE).edit()) {
+        remove(key)
+        apply()
+    }
+}
