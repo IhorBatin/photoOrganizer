@@ -241,7 +241,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
             .setItems(getListOfOptions()) { dialog, i ->
                 when (i) {
                     0 -> showPasswordSetupAlert(vm, dir)
-                    1 -> handleBiometricLockOption()
+                    1 -> handleBiometricLockOption(vm, dir)
                 }
                 dialog.dismiss()
             }
@@ -324,7 +324,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
-    fun showDeletePasswordAlert(vm: ImagesViewModel, dir: File) {
+    fun showDeletePasswordAlert(dir: File) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.delete_password_custom_alert, null)
 
@@ -359,8 +359,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
         // Important to clear given flags in order for keyboard to show up
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
-
-
 
     fun showChangeDirectoryColorAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
@@ -431,9 +429,12 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
     }
 
-    private fun handleBiometricLockOption() {
+    private fun handleBiometricLockOption(vm: ImagesViewModel, dir: File) {
         val biometricUtil = BiometricUtil(activity)
+        when (biometricUtil.isFingerprintAvailable) {
+            true -> biometricUtil.showBiometricPrompt(vm, dir, PromptType.SETUP)
+            false -> biometricUtil.showBiometricsNotSetupAlert()
+        }
     }
-
 
 }

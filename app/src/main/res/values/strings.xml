@@ -13,5 +13,11 @@
     <string name="confirm_text">Confirm</string>
     <string name="home_text">Home</string>
     <string name="create_password_title">Create New Password</string>
-
+    <string name="biometrics_not_setup_title">Biometrics is not setup</string>
+    <string name="biometrics_not_setup_msg">Please proceed to setting in order to sutup biometric authentication</string>
+    <string name="proceed_text">Proceed</string>
+    <string name="biometric_setup_prompt_sub_title">Use Biometrics to set lock on this folder</string>
+    <string name="biometric_unlock_prompt_sub_title">Use Biometrics to unlock this folder</string>
+    <string name="biometric_delete_prompt_sub_title">Use Biometrics to remove lock from this folder</string>
+    <string name="biometric_prompt_title">Confirm Biometrics</string>
 </resources>

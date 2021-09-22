@@ -1,23 +1,26 @@
 package com.example.photoorganizer.utils
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import androidx.biometric.BiometricManager
 
 import android.os.Build
 import android.provider.Settings
-import android.view.LayoutInflater
-import androidx.appcompat.view.ContextThemeWrapper
+import android.widget.Toast
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS
 import androidx.biometric.BiometricManager.from
+import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.PromptInfo
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import com.example.photoorganizer.R
+import com.example.photoorganizer.ext.setDirectoryBiometricLocked
+import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.io.File
 
 class BiometricUtil(private val context: Context) {
 
@@ -50,36 +53,81 @@ class BiometricUtil(private val context: Context) {
         }
 
     fun showBiometricsNotSetupAlert() {
-        val biometricSetupIntent: Intent
-        val alertMessage: String
-        /**
-         * Must check version as we don't have ACTION_FINGERPRINT_ENROLL
-         * in Android prior to 9.0 and will use ACTION_SECURITY_SETTINGS.
-         * Also will show different alert message for versions older than 9.0
-         */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            alertMessage = "Setup Biometrics"
-            biometricSetupIntent = Intent(Settings.ACTION_FINGERPRINT_ENROLL)
-        } else {
-            alertMessage = "Setup Biometrics"
-            biometricSetupIntent = Intent(Settings.ACTION_SECURITY_SETTINGS)
-        }
         MaterialAlertDialogBuilder(
             context,
-            com.example.photoorganizer.R.style.ThemeOverlay_App_MaterialAlertDialog
+            R.style.ThemeOverlay_App_MaterialAlertDialog
         )
             .setCancelable(true)
-            .setTitle("Title ")
-            .setMessage(alertMessage)
-            .setPositiveButton(context.getString(R.string.confirm_text)) { dialog, which ->
-                context.startActivity(biometricSetupIntent)
+            .setTitle(context.getString(R.string.biometrics_not_setup_title))
+            .setMessage(context.getString(R.string.biometrics_not_setup_msg))
+            .setPositiveButton(context.getString(R.string.proceed_text)) { dialog, _ ->
+                context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
                 dialog.dismiss()
             }
-            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, which ->
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
                 dialog.dismiss()
             }
             .create()
             .show()
+    }
+
+    fun showBiometricPrompt(vm: ImagesViewModel, dir: File, type: PromptType) {
+        val executor = ContextCompat.getMainExecutor(context)
+        val biometricPrompt = BiometricPrompt(
+            (context as FragmentActivity?)!!,
+            executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    when (type) {
+                        PromptType.SETUP -> {
+                            dir.setDirectoryBiometricLocked(context, true)
+                            vm.refreshFiles()
+                        }
+                        PromptType.UNLOCK -> {
+                            vm.setRootDir(dir)
+                            vm.refreshFiles()
+                        }
+                        PromptType.DELETE -> {
+                            dir.setDirectoryBiometricLocked(context, false)
+                            vm.refreshFiles()
+                        }
+                    }
+                }
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    if (errorCode == BiometricPrompt.ERROR_LOCKOUT || errorCode == BiometricPrompt.ERROR_LOCKOUT_PERMANENT) {
+                        Toast.makeText(context, errString, Toast.LENGTH_SHORT).show()
+                    }
+                    super.onAuthenticationError(errorCode, errString)
+                }
+            })
+        biometricPrompt.authenticate(createPromptBuilder(context, type))
+    }
+
+    private fun createPromptBuilder(context: Context, type: PromptType): PromptInfo {
+        return when (type) {
+            PromptType.SETUP -> {
+                PromptInfo.Builder()
+                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setSubtitle(context.getString(R.string.biometric_setup_prompt_sub_title))
+                    .setNegativeButtonText(context.getString(R.string.cancel_text))
+                    .build()
+            }
+            PromptType.UNLOCK -> {
+                PromptInfo.Builder()
+                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setSubtitle(context.getString(R.string.biometric_unlock_prompt_sub_title))
+                    .setNegativeButtonText(context.getString(R.string.cancel_text))
+                    .build()
+            }
+            PromptType.DELETE -> {
+                PromptInfo.Builder()
+                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setSubtitle(context.getString(R.string.biometric_delete_prompt_sub_title))
+                    .setNegativeButtonText(context.getString(R.string.cancel_text))
+                    .build()
+            }
+        }
     }
 
 }

@@ -6,6 +6,7 @@ package com.example.photoorganizer
 // TODO: Add locking whole app, and specific folder, features [use ext functions on File obj to to do this]
 // TODO: For the folder that is locked have it display small lock icon in the corner of folder
 // TODO: Add Animation to bottom menu
+// TODO: Fix folders moving order when content inside is updated
 
 /** Fixes and Bugs */
 // TODO: Clean nup logic code in activity and view model

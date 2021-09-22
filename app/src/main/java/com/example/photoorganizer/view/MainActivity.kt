@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bundledMainActivity: ActivityMainBinding
     private lateinit var imagesViewModel: ImagesViewModel
     private lateinit var fileUtil: FileUtil
+    private lateinit var biometricUtil: BiometricUtil
     private lateinit var recyclerView: RecyclerView
     private lateinit var customImageAdapter: CustomImageAdapter
 
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
 
         fileUtil = FileUtil(this, applicationContext)
+        biometricUtil = BiometricUtil(this)
 
         rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
 
@@ -170,7 +172,7 @@ class MainActivity : AppCompatActivity() {
             Timber.tag(DEBUG_TAG).d("Long Clicked: '${fileLongClicked.name}'")
 
             if (fileLongClicked.isDirectory) {
-                handleOnDirectoryLongClick(fileLongClicked, position)
+                handleOnDirectoryLongClick(fileLongClicked)
             }
             else {
                 handleOnImageLongClick(fileLongClicked, position)
@@ -209,15 +211,15 @@ class MainActivity : AppCompatActivity() {
         toggleImageLongClickOptions(false)
         toggleDirectoryLongClickOptions(false)
         if (dir.isDirectoryPwdLocked(this)) fileUtil.showEnterPasswordAlert(imagesViewModel, dir)
-        //if (dir.isDirectoryBiometricLocked(this)) fileUtil.showBiometricAuthenticator()
-        else {
+        if (dir.isDirectoryBiometricLocked(this)) biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.UNLOCK)
+        else if (!dir.isDirectoryPwdLocked(this) && !dir.isDirectoryBiometricLocked(this)){
             imagesViewModel.setRootDir(dir)
             Timber.tag(DEBUG_TAG).d("New root = /${imagesViewModel.getCurrentRoot()?.name}")
             Timber.tag(DEBUG_TAG).d(" Contains files = ${imagesViewModel.getCurrentRoot()?.listFiles()?.size}")
         }
     }
 
-    private fun handleOnDirectoryLongClick(dir: File, pos: Int) {
+    private fun handleOnDirectoryLongClick(dir: File) {
         toggleImageLongClickOptions(false)
         toggleDirectoryLongClickOptions(true)
 
@@ -235,7 +237,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         bundledMainActivity.ivLockDirectory.setOnClickListener {
-            if (dir.isDirectoryPwdLocked(this)) fileUtil.showDeletePasswordAlert(imagesViewModel, dir)
+            if (dir.isDirectoryPwdLocked(this)) fileUtil.showDeletePasswordAlert(dir)
+            if (dir.isDirectoryBiometricLocked(this)) biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.DELETE)
             else fileUtil.showChooseLockTypeAlert(imagesViewModel, dir)
             toggleDirectoryLongClickOptions(false)
         }
