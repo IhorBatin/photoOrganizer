@@ -4,9 +4,7 @@ package com.example.photoorganizer
 
 /** Tasks **/
 // TODO: Add locking whole app, and specific folder, features [use ext functions on File obj to to do this]
-// TODO: Add Notifications
 // TODO: Add Animation to bottom menu
-
 
 /** Fixes and Bugs */
 // TODO: Clean nup logic code in activity and view model
