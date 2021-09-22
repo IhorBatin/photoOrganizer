@@ -15,6 +15,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
+import com.example.photoorganizer.ext.getDirectoryPassword
+import com.example.photoorganizer.ext.isDirectoryLocked
+import com.example.photoorganizer.ext.setDirectoryPassword
 import com.example.photoorganizer.utils.*
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.example.photoorganizer.viewmodel.ViewModelFactory
@@ -217,12 +220,26 @@ class MainActivity : AppCompatActivity() {
         toggleImageLongClickOptions(false)
         toggleDirectoryLongClickOptions(true)
 
+        Timber.tag(DEBUG_TAG).d("Is ${dir.name} Locked: ${dir.isDirectoryLocked(this)}")
+        Timber.tag(DEBUG_TAG).d("${dir.name} pass: ${dir.getDirectoryPassword(this)}")
+
         bundledMainActivity.ivDeleteDirectory.setOnClickListener {
-            fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir, bundledMainActivity)
+            fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir)
+            toggleDirectoryLongClickOptions(false)
         }
 
         bundledMainActivity.ivChangeDirColor.setOnClickListener {
             fileUtil.showChangeDirectoryColorAlert(imagesViewModel, dir)
+            toggleDirectoryLongClickOptions(false)
+        }
+
+        bundledMainActivity.ivLockDirectory.setOnClickListener {
+            if (dir.isDirectoryLocked(this)) {
+
+            }
+            else {
+                fileUtil.showChooseLockTypeAlert(imagesViewModel, dir)
+            }
             toggleDirectoryLongClickOptions(false)
         }
     }

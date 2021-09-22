@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -151,7 +152,8 @@ open class FileUtil(private val activity: Activity, private val context: Context
         val dialog = MaterialAlertDialogBuilder(
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
-        ).setCancelable(false)
+        )
+            .setCancelable(false)
             .setCustomTitle(customView)
             .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
                 // Respond to negative button press
@@ -201,11 +203,12 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
-    fun showDeleteDirectoryAlert(vm: ImagesViewModel, dir: File, binding: ActivityMainBinding) {
+    fun showDeleteDirectoryAlert(vm: ImagesViewModel, dir: File) {
         val dialog = MaterialAlertDialogBuilder(
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
-        ).setTitle(context.getString(R.string.Delete_FolderText))
+        )
+            .setTitle(context.getString(R.string.Delete_FolderText))
             .setNegativeButton(context.getString(R.string.delete_text)) { dialog, _ ->
                 // Deleting Directory
                 if (!dir.deleteRecursively()) {
@@ -224,11 +227,62 @@ open class FileUtil(private val activity: Activity, private val context: Context
 
         dialog.setOnDismissListener {
             vm.refreshFiles()
-            binding.clDirectoryOptions.visibility = View.GONE
         }
 
         dialog.show()
     }
+
+    @SuppressLint("InflateParams")
+    fun showChooseLockTypeAlert(vm: ImagesViewModel, dir: File?) {
+        MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        )
+            .setCancelable(true)
+            .setTitle("Select type of protection")
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setItems(getListOfOptions()) { dialog, i ->
+                when (i) {
+                    0 -> showPasswordSetupAlert(vm, dir)
+                    1 -> handleBiometricLockOption()
+                }
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
+
+    @SuppressLint("InflateParams")
+    fun showPasswordSetupAlert(vm: ImagesViewModel, dir: File?) {
+        val layoutInflater = LayoutInflater.from(context)
+        val customView: View = layoutInflater.inflate(R.layout.edit_text_custom_alert, null)
+
+        val dialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        ).setCancelable(false)
+            .setCustomTitle(customView)
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(context.getString(R.string.confirm_text), null)
+            .create()
+
+        dialog.setOnShowListener {
+            val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+
+            positiveBtn.setOnClickListener {
+
+            }
+        }
+
+        dialog.show()
+        // Important to clear given flags in order for keyboard to show up
+        dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+    }
+
 
     fun showChangeDirectoryColorAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
@@ -251,7 +305,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.setOnDismissListener {
             vm.refreshFiles()
         }
-
         dialog.show()
     }
 
@@ -292,5 +345,18 @@ open class FileUtil(private val activity: Activity, private val context: Context
             dialog.dismiss()
         }
     }
+
+    private fun getListOfOptions() : Array<String>{
+        return when(BiometricUtil(activity).isBiometricSupported) {
+            true -> arrayOf("Regular Password", "Phone Biometrics")
+            false -> arrayOf("Regular Password")
+        }
+    }
+
+
+    private fun handleBiometricLockOption() {
+        val biometricUtil = BiometricUtil(activity)
+    }
+
 
 }
