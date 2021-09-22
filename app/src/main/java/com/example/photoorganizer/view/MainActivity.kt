@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        //imagesViewModel.updateFiles(rootDir)
         imagesViewModel.setRootDir(imagesViewModel.getCurrentRoot())
     }
 
@@ -95,10 +94,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleCreateNewFolderClick() {
-        //val newFile = fileUtil.createNewDirectory("testing5")
         fileUtil.showNewFolderAlert(imagesViewModel, imagesViewModel.getCurrentRoot())
-        //Timber.tag(DEBUG_TAG).d("Created: ${newFile.absolutePath}")
-        //imagesViewModel.updateFiles(root)
     }
 
     override fun onStart() {
@@ -150,7 +146,6 @@ class MainActivity : AppCompatActivity() {
             itemAnimator = DefaultItemAnimator()
         }
 
-        // Setting RV ClickListeners
         setupRVListeners()
     }
 
@@ -210,21 +205,18 @@ class MainActivity : AppCompatActivity() {
     private fun handleOnDirectoryClick(dir: File) {
         toggleImageLongClickOptions(false)
         toggleDirectoryLongClickOptions(false)
-        if (dir.isDirectoryPwdLocked(this)) fileUtil.showEnterPasswordAlert(imagesViewModel, dir)
-        if (dir.isDirectoryBiometricLocked(this)) biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.UNLOCK)
-        else if (!dir.isDirectoryPwdLocked(this) && !dir.isDirectoryBiometricLocked(this)){
+
+        if (dir.isDirectoryPwdLocked(this))
+            fileUtil.showEnterPasswordAlert(imagesViewModel, dir)
+        if (dir.isDirectoryBiometricLocked(this))
+            biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.UNLOCK)
+        else if (!dir.isDirectoryLocked(this))
             imagesViewModel.setRootDir(dir)
-            Timber.tag(DEBUG_TAG).d("New root = /${imagesViewModel.getCurrentRoot()?.name}")
-            Timber.tag(DEBUG_TAG).d(" Contains files = ${imagesViewModel.getCurrentRoot()?.listFiles()?.size}")
-        }
     }
 
     private fun handleOnDirectoryLongClick(dir: File) {
         toggleImageLongClickOptions(false)
         toggleDirectoryLongClickOptions(true)
-
-        Timber.tag(DEBUG_TAG).d("Is ${dir.name} Locked: ${dir.isDirectoryLocked(this)}")
-        Timber.tag(DEBUG_TAG).d("${dir.name} pass: ${dir.getDirectoryPassword(this)}")
 
         bundledMainActivity.ivDeleteDirectory.setOnClickListener {
             fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir)
@@ -237,9 +229,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         bundledMainActivity.ivLockDirectory.setOnClickListener {
-            if (dir.isDirectoryPwdLocked(this)) fileUtil.showDeletePasswordAlert(dir)
-            if (dir.isDirectoryBiometricLocked(this)) biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.DELETE)
-            else fileUtil.showChooseLockTypeAlert(imagesViewModel, dir)
+            if (dir.isDirectoryPwdLocked(this))
+                fileUtil.showDeletePasswordAlert(dir)
+            if (dir.isDirectoryBiometricLocked(this))
+                biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.DELETE)
+            else if (!dir.isDirectoryLocked(this))
+                fileUtil.showChooseLockTypeAlert(imagesViewModel, dir)
             toggleDirectoryLongClickOptions(false)
         }
     }
@@ -259,7 +254,6 @@ class MainActivity : AppCompatActivity() {
     @SuppressWarnings("deprecation")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        //super.onActivityResult(requestCode, resultCode, data)
         Timber.tag(DEBUG_TAG).d("onActivityResult()")
 
         /** Handling return from image capture activity */

@@ -8,10 +8,6 @@ object ImagesRepository {
         return sortFilesByDate(fetchAllFilesFromDir(rootFile), desc)
     }
 
-    fun fetchImagesOnlyByDate(rootFile: File?, desc: Boolean = false) : Array<out File>? {
-        return sortFilesByDate(fetchAllFilesFromDir(rootFile), desc)
-    }
-
     private fun fetchAllFilesFromDir(rootFile: File?) : Array<out File>? {
         return rootFile?.listFiles()
     }
