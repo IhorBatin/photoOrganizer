@@ -13,7 +13,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 31
         versionCode 1
-        versionName "1.0.2-alpha"
+        versionName "1.0.3-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -69,4 +69,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation platform('com.google.firebase:firebase-bom:28.4.1')
+
+    //Biometrics
+    implementation 'androidx.biometric:biometric:1.1.0'
 }

@@ -15,12 +15,15 @@
         <entry key="app/src/main/res/layout/activity_screen_slide.xml" value="0.24139492753623187" />
         <entry key="app/src/main/res/layout/change_folder_color_custom_alert.xml" value="0.23324275362318841" />
         <entry key="app/src/main/res/layout/color_chooser_item.xml" value="0.2259963768115942" />
+        <entry key="app/src/main/res/layout/delete_password_custom_alert.xml" value="0.2391304347826087" />
         <entry key="app/src/main/res/layout/edit_text_custom_alert.xml" value="0.19701086956521738" />
+        <entry key="app/src/main/res/layout/enter_password_custom_alert.xml" value="0.2391304347826087" />
         <entry key="app/src/main/res/layout/fragment_blank.xml" value="0.24456521739130435" />
         <entry key="app/src/main/res/layout/fragment_full_screen.xml" value="0.15070921985815602" />
         <entry key="app/src/main/res/layout/fragment_screen_slide_page.xml" value="0.24139492753623187" />
         <entry key="app/src/main/res/layout/item_image_holder.xml" value="0.24456521739130435" />
         <entry key="app/src/main/res/layout/rounded_corners.xml" value="0.2259963768115942" />
+        <entry key="app/src/main/res/layout/setup_password_custom_alert.xml" value="0.2391304347826087" />
       </map>
     </option>
   </component>

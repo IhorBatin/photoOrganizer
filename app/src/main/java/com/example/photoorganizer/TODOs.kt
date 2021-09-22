@@ -3,7 +3,6 @@ package com.example.photoorganizer
 // TODO`s
 
 /** Tasks **/
-// TODO: Add locking whole app, and specific folder, features [use ext functions on File obj to to do this]
 // TODO: Add Animation to bottom menu
 
 /** Fixes and Bugs */
@@ -12,7 +11,7 @@ package com.example.photoorganizer
 // TODO: Fix bottom menu icons to be bigger, also add sub-names
 
 /** Future Plans/Features */
-// TODO: Add zoom in/out on picture (https://stackoverflow.com/questions/6650398/android-imageview-zoom-in-and-zoom-out)
+// TODO: Add zoom in/out on fullscreen picture (https://stackoverflow.com/questions/6650398/android-imageview-zoom-in-and-zoom-out)
 // TODO: Add ability to change num of columns (1-2-3-4-5 on pinch or zoom with fingers/ add chooser on top)
 // TODO: Add ability to share & delete multiple images from list
 

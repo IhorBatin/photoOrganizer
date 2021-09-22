@@ -27,13 +27,7 @@ class ScreenSlidePagerActivity : FragmentActivity() {
         setContentView(R.layout.activity_screen_slide)
         imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(ImagesViewModel::class.java)
         imagesViewModel.getImagesForViewPager(imagesViewModel.rootDirLiveData.value)
-
         fileUtil = FileUtil(this, applicationContext)
-
-        Timber.tag(DEBUG_TAG).d("*** Image Slider")
-        Timber.tag(DEBUG_TAG).d("Root Directory: ${imagesViewModel.rootDirLiveData.value?.name}")
-        Timber.tag(DEBUG_TAG).d("Num Images: ${imagesViewModel.imagesListLiveData.value?.size}")
-
         openImageAtPosition = intent.getIntExtra(OPEN_AT_POS, 0)
 
         setupObservers()

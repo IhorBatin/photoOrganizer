@@ -4,10 +4,20 @@
     <string name="Error_IllegalFileName">Illegal characters used</string>
     <string name="Error_FileNameTooLong">Filename is too long</string>
     <string name="Error_SomethingWrong">Something went wrong</string>
+    <string name="Error_PwdMissMatch">Passwords Don\'t Match</string>
+    <string name="Error_WrongPassword">Wrong Password</string>
     <string name="Delete_FolderText">Are you sure want delete all files in this folder?</string>
     <string name="chooser_title">Share this image with </string>
     <string name="cancel_text">Cancel</string>
     <string name="delete_text">Delete</string>
     <string name="confirm_text">Confirm</string>
     <string name="home_text">Home</string>
+    <string name="create_password_title">Create New Password</string>
+    <string name="biometrics_not_setup_title">Biometrics is not setup</string>
+    <string name="biometrics_not_setup_msg">Please proceed to setting in order to sutup biometric authentication</string>
+    <string name="proceed_text">Proceed</string>
+    <string name="biometric_setup_prompt_sub_title">Use Biometrics to set lock on this folder</string>
+    <string name="biometric_unlock_prompt_sub_title">Use Biometrics to unlock this folder</string>
+    <string name="biometric_delete_prompt_sub_title">Use Biometrics to remove lock from this folder</string>
+    <string name="biometric_prompt_title">Confirm Biometrics</string>
 </resources>
