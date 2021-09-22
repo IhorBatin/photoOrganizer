@@ -6,6 +6,7 @@ import com.example.photoorganizer.R
 import java.io.File
 
 const val SP_PASSWORD = "_PASSWORD"
+const val SP_BIO_LOCK = "_BIOMETRICS"
 
 fun File.getDirectoryColor(activity: Activity) : Int {
     return activity.getPreferences(Context.MODE_PRIVATE)
@@ -21,7 +22,11 @@ fun File.setDirectoryColor(activity: Activity, color: Int) {
 }
 
 fun File.isDirectoryLocked(activity: Activity) : Boolean {
-    return when(this.getDirectoryPassword(activity)) {
+    return isDirectoryPwdLocked(activity) || isDirectoryBiometricLocked(activity)
+}
+
+fun File.isDirectoryPwdLocked(activity: Activity) : Boolean {
+    return when(getDirectoryPassword(activity)) {
         null -> false
         else -> true
     }
@@ -33,11 +38,35 @@ fun File.getDirectoryPassword(activity: Activity) : String? {
         .getString(key, null)
 }
 
-fun File.setDirectoryPassword(activity: Activity, newPass: String) {
+fun File.setDirectoryPassword(activity: Activity, pass: String) {
     val key = this.path + SP_PASSWORD
     activity.getPreferences(Context.MODE_PRIVATE)
     with (activity.getPreferences(Context.MODE_PRIVATE).edit()) {
-        putString(key, newPass)
+        putString(key, pass)
+        apply()
+    }
+}
+
+fun File.clearDirectoryPassword(activity: Activity) {
+    val key = this.path + SP_PASSWORD
+    activity.getPreferences(Context.MODE_PRIVATE)
+    with (activity.getPreferences(Context.MODE_PRIVATE).edit()) {
+        remove(key)
+        apply()
+    }
+}
+
+fun File.isDirectoryBiometricLocked(activity: Activity) : Boolean {
+    val key = this.path + SP_BIO_LOCK
+    return activity.getPreferences(Context.MODE_PRIVATE)
+        .getBoolean(key, false)
+}
+
+fun File.setDirectoryBiometricLocked(activity: Activity, locked: Boolean) {
+    val key = this.path + SP_BIO_LOCK
+    activity.getPreferences(Context.MODE_PRIVATE)
+    with (activity.getPreferences(Context.MODE_PRIVATE).edit()) {
+        putBoolean(key, locked)
         apply()
     }
 }

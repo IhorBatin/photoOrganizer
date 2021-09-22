@@ -15,9 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.databinding.ActivityMainBinding
-import com.example.photoorganizer.ext.getDirectoryPassword
-import com.example.photoorganizer.ext.isDirectoryLocked
-import com.example.photoorganizer.ext.setDirectoryPassword
+import com.example.photoorganizer.ext.*
 import com.example.photoorganizer.utils.*
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.example.photoorganizer.viewmodel.ViewModelFactory
@@ -210,10 +208,13 @@ class MainActivity : AppCompatActivity() {
     private fun handleOnDirectoryClick(dir: File) {
         toggleImageLongClickOptions(false)
         toggleDirectoryLongClickOptions(false)
-        imagesViewModel.setRootDir(dir)
-        imagesViewModel.getFilesByDate(imagesViewModel.getCurrentRoot())
-        Timber.tag(DEBUG_TAG).d("New root = /${imagesViewModel.getCurrentRoot()?.name}")
-        Timber.tag(DEBUG_TAG).d(" Contains files = ${imagesViewModel.getCurrentRoot()?.listFiles()?.size}")
+        if (dir.isDirectoryPwdLocked(this)) fileUtil.showEnterPasswordAlert(imagesViewModel, dir)
+        //if (dir.isDirectoryBiometricLocked(this)) fileUtil.showBiometricAuthenticator()
+        else {
+            imagesViewModel.setRootDir(dir)
+            Timber.tag(DEBUG_TAG).d("New root = /${imagesViewModel.getCurrentRoot()?.name}")
+            Timber.tag(DEBUG_TAG).d(" Contains files = ${imagesViewModel.getCurrentRoot()?.listFiles()?.size}")
+        }
     }
 
     private fun handleOnDirectoryLongClick(dir: File, pos: Int) {
@@ -234,12 +235,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         bundledMainActivity.ivLockDirectory.setOnClickListener {
-            if (dir.isDirectoryLocked(this)) {
-
-            }
-            else {
-                fileUtil.showChooseLockTypeAlert(imagesViewModel, dir)
-            }
+            if (dir.isDirectoryPwdLocked(this)) fileUtil.showDeletePasswordAlert(imagesViewModel, dir)
+            else fileUtil.showChooseLockTypeAlert(imagesViewModel, dir)
             toggleDirectoryLongClickOptions(false)
         }
     }

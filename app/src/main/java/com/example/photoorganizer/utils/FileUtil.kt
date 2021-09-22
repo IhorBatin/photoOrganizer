@@ -4,13 +4,14 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.widget.*
 import androidx.core.app.ActivityCompat.startActivityForResult
@@ -19,9 +20,7 @@ import androidx.core.content.FileProvider
 import com.example.photoorganizer.R
 import com.example.photoorganizer.adapters.CustomImageAdapter
 import com.example.photoorganizer.adapters.ScreenSlidePagerAdapter
-import com.example.photoorganizer.databinding.ActivityMainBinding
-import com.example.photoorganizer.ext.setDirectoryColor
-import com.example.photoorganizer.ext.toggleErrorMessage
+import com.example.photoorganizer.ext.*
 import com.example.photoorganizer.repository.ImagesRepository
 import com.example.photoorganizer.viewmodel.ImagesViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -153,10 +152,8 @@ open class FileUtil(private val activity: Activity, private val context: Context
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
         )
-            .setCancelable(false)
             .setCustomTitle(customView)
             .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
-                // Respond to negative button press
                 dialog.dismiss()
             }
             .setPositiveButton(context.getString(R.string.confirm_text), null)
@@ -197,7 +194,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
                 }
             }
         }
-
         dialog.show()
         // Important to clear given flags in order for keyboard to show up
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
@@ -233,12 +229,11 @@ open class FileUtil(private val activity: Activity, private val context: Context
     }
 
     @SuppressLint("InflateParams")
-    fun showChooseLockTypeAlert(vm: ImagesViewModel, dir: File?) {
+    fun showChooseLockTypeAlert(vm: ImagesViewModel, dir: File) {
         MaterialAlertDialogBuilder(
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
         )
-            .setCancelable(true)
             .setTitle("Select type of protection")
             .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
                 dialog.dismiss()
@@ -255,14 +250,14 @@ open class FileUtil(private val activity: Activity, private val context: Context
     }
 
     @SuppressLint("InflateParams")
-    fun showPasswordSetupAlert(vm: ImagesViewModel, dir: File?) {
+    fun showPasswordSetupAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
-        val customView: View = layoutInflater.inflate(R.layout.edit_text_custom_alert, null)
+        val customView: View = layoutInflater.inflate(R.layout.setup_password_custom_alert, null)
 
         val dialog = MaterialAlertDialogBuilder(
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
-        ).setCancelable(false)
+        )
             .setCustomTitle(customView)
             .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
                 dialog.dismiss()
@@ -272,16 +267,99 @@ open class FileUtil(private val activity: Activity, private val context: Context
 
         dialog.setOnShowListener {
             val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            val errorView = customView.findViewById<TextView>(R.id.tvPwdSetupErrorMessage)
+            val pwd1 = customView.findViewById<EditText>(R.id.etPwd1)
+            val pwd2 = customView.findViewById<EditText>(R.id.etPwd2)
 
             positiveBtn.setOnClickListener {
-
+                if (pwd1.text.toString().isNotEmpty() &&
+                    (pwd1.text.toString() == pwd2.text.toString())) {
+                    errorView.visibility = GONE
+                    dir.setDirectoryPassword(activity, pwd1.text.toString())
+                    vm.refreshFiles()
+                    dialog.dismiss()
+                }
+                else errorView.visibility = VISIBLE
             }
         }
-
         dialog.show()
         // Important to clear given flags in order for keyboard to show up
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
+
+    @SuppressLint("InflateParams")
+    fun showEnterPasswordAlert(vm: ImagesViewModel, dir: File) {
+        val layoutInflater = LayoutInflater.from(context)
+        val customView: View = layoutInflater.inflate(R.layout.enter_password_custom_alert, null)
+
+        val dialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        )
+            .setCustomTitle(customView)
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(context.getString(R.string.confirm_text), null)
+            .create()
+
+        dialog.setOnShowListener {
+            val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveBtn.setOnClickListener {
+                val passView = customView.findViewById<EditText>(R.id.etPassword)
+                val passError = customView.findViewById<TextView>(R.id.tvPwdErrorMessage)
+
+                when (passView.text.toString() == dir.getDirectoryPassword(activity)) {
+                    true -> {
+                        passError.visibility = GONE
+                        vm.setRootDir(dir)
+                        dialog.dismiss()
+                    }
+                    false -> passError.visibility = VISIBLE
+                }
+            }
+        }
+        dialog.show()
+        // Important to clear given flags in order for keyboard to show up
+        dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+    }
+
+    fun showDeletePasswordAlert(vm: ImagesViewModel, dir: File) {
+        val layoutInflater = LayoutInflater.from(context)
+        val customView: View = layoutInflater.inflate(R.layout.delete_password_custom_alert, null)
+
+        val dialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        )
+            .setCustomTitle(customView)
+            .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(context.getString(R.string.confirm_text), null)
+            .create()
+
+        dialog.setOnShowListener {
+            val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveBtn.setOnClickListener {
+                val passView = customView.findViewById<EditText>(R.id.etConfPassword)
+                val passError = customView.findViewById<TextView>(R.id.tvPwdDelErrorMessage)
+
+                when (passView.text.toString() == dir.getDirectoryPassword(activity)) {
+                    true -> {
+                        passError.visibility = GONE
+                        dir.clearDirectoryPassword(activity)
+                        dialog.dismiss()
+                    }
+                    false -> passError.visibility = VISIBLE
+                }
+            }
+        }
+        dialog.show()
+        // Important to clear given flags in order for keyboard to show up
+        dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+    }
+
 
 
     fun showChangeDirectoryColorAlert(vm: ImagesViewModel, dir: File) {
@@ -291,7 +369,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         val dialog = MaterialAlertDialogBuilder(
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
-        ).setCancelable(true)
+        )
             .setCustomTitle(customView)
             .setNegativeButton(context.getString(R.string.cancel_text)) { dialog, _ ->
                 dialog.dismiss()
@@ -352,7 +430,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
             false -> arrayOf("Regular Password")
         }
     }
-
 
     private fun handleBiometricLockOption() {
         val biometricUtil = BiometricUtil(activity)
