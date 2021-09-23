@@ -109,21 +109,21 @@ class BiometricUtil(private val context: Context) {
         return when (type) {
             PromptType.SETUP -> {
                 PromptInfo.Builder()
-                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setTitle(context.getString(R.string.biometric_prompt_confirm_title))
                     .setSubtitle(context.getString(R.string.biometric_setup_prompt_sub_title))
                     .setNegativeButtonText(context.getString(R.string.cancel_text))
                     .build()
             }
             PromptType.UNLOCK -> {
                 PromptInfo.Builder()
-                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setTitle(context.getString(R.string.biometric_prompt_unlock_title))
                     .setSubtitle(context.getString(R.string.biometric_unlock_prompt_sub_title))
                     .setNegativeButtonText(context.getString(R.string.cancel_text))
                     .build()
             }
             PromptType.DELETE -> {
                 PromptInfo.Builder()
-                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setTitle(context.getString(R.string.biometric_prompt_disable_title))
                     .setSubtitle(context.getString(R.string.biometric_delete_prompt_sub_title))
                     .setNegativeButtonText(context.getString(R.string.cancel_text))
                     .build()

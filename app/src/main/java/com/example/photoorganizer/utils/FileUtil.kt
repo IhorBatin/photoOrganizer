@@ -204,9 +204,10 @@ open class FileUtil(private val activity: Activity, private val context: Context
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
         )
-            .setTitle(context.getString(R.string.Delete_FolderText))
+            .setTitle(context.getString(R.string.Delete_FolderTitleText))
+            .setMessage(context.getString(R.string.Delete_FolderMsgText))
             .setNegativeButton(context.getString(R.string.delete_text)) { dialog, _ ->
-                // Deleting Directory
+                // Deleting Directory and all files/directories inside
                 if (!dir.deleteRecursively()) {
                     Toast.makeText(
                         context,
@@ -226,6 +227,20 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
 
         dialog.show()
+    }
+
+    fun showCantDeleteDirectoryAlert() {
+        MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        )
+            .setTitle(context.getString(R.string.CantDelete_FolderTitleText))
+            .setMessage(context.getString(R.string.CantDelete_FolderMsgText))
+            .setPositiveButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     @SuppressLint("InflateParams")

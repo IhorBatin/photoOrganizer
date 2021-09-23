@@ -219,8 +219,13 @@ class MainActivity : AppCompatActivity() {
         toggleDirectoryLongClickOptions(true)
 
         bundledMainActivity.ivDeleteDirectory.setOnClickListener {
-            fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir)
-            toggleDirectoryLongClickOptions(false)
+            when (dir.isDirectoryLocked(this)) {
+                true -> fileUtil.showCantDeleteDirectoryAlert()
+                else -> {
+                    fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir)
+                    toggleDirectoryLongClickOptions(false)
+                }
+            }
         }
 
         bundledMainActivity.ivChangeDirColor.setOnClickListener {
