@@ -339,7 +339,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
-    fun showDeletePasswordAlert(dir: File) {
+    fun showDeletePasswordAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.delete_password_custom_alert, null)
 
@@ -364,6 +364,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
                     true -> {
                         passError.visibility = GONE
                         dir.clearDirectoryPassword(activity)
+                        vm.refreshFiles()
                         dialog.dismiss()
                     }
                     false -> passError.visibility = VISIBLE

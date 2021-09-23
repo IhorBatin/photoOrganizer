@@ -83,17 +83,15 @@ class BiometricUtil(private val context: Context) {
                     when (type) {
                         PromptType.SETUP -> {
                             dir.setDirectoryBiometricLocked(context, true)
-                            vm.refreshFiles()
                         }
                         PromptType.UNLOCK -> {
                             vm.setRootDir(dir)
-                            vm.refreshFiles()
                         }
                         PromptType.DELETE -> {
                             dir.clearDirectoryBiometricLock(context)
-                            vm.refreshFiles()
                         }
                     }
+                    vm.refreshFiles()
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     if (errorCode == BiometricPrompt.ERROR_LOCKOUT || errorCode == BiometricPrompt.ERROR_LOCKOUT_PERMANENT) {

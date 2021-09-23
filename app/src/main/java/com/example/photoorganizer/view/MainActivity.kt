@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity() {
 
         bundledMainActivity.ivLockDirectory.setOnClickListener {
             if (dir.isDirectoryPwdLocked(this))
-                fileUtil.showDeletePasswordAlert(dir)
+                fileUtil.showDeletePasswordAlert(imagesViewModel, dir)
             if (dir.isDirectoryBiometricLocked(this))
                 biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.DELETE)
             else if (!dir.isDirectoryLocked(this))
