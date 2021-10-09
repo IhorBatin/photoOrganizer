@@ -38,19 +38,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         bundledMainActivity = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bundledMainActivity.root)
-        supportActionBar?.title = getString(R.string.home_text)
 
         Timber.plant(Timber.DebugTree())
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
 
         fileUtil = FileUtil(this, applicationContext)
         biometricUtil = BiometricUtil(this)
-
         rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-
         imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(ImagesViewModel::class.java)
-        imagesViewModel.setRootDir(rootDir)
-        //Timber.tag(DEBUG_TAG).d("Root = ${rootDir.path}")
+
+        // Prevents returning to root dir on device rotation
+        if (imagesViewModel.getCurrentRoot() == null) { imagesViewModel.setRootDir(rootDir) }
 
         setupObservers()
         setupRecyclerView()
