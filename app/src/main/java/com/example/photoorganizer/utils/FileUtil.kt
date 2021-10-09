@@ -204,9 +204,10 @@ open class FileUtil(private val activity: Activity, private val context: Context
             activity,
             R.style.ThemeOverlay_App_MaterialAlertDialog
         )
-            .setTitle(context.getString(R.string.Delete_FolderText))
+            .setTitle(context.getString(R.string.Delete_FolderTitleText))
+            .setMessage(context.getString(R.string.Delete_FolderMsgText))
             .setNegativeButton(context.getString(R.string.delete_text)) { dialog, _ ->
-                // Deleting Directory
+                // Deleting Directory and all files/directories inside
                 if (!dir.deleteRecursively()) {
                     Toast.makeText(
                         context,
@@ -226,6 +227,20 @@ open class FileUtil(private val activity: Activity, private val context: Context
         }
 
         dialog.show()
+    }
+
+    fun showCantDeleteDirectoryAlert() {
+        MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_App_MaterialAlertDialog
+        )
+            .setTitle(context.getString(R.string.CantDelete_FolderTitleText))
+            .setMessage(context.getString(R.string.CantDelete_FolderMsgText))
+            .setPositiveButton(context.getString(R.string.cancel_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     @SuppressLint("InflateParams")
@@ -324,7 +339,8 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
-    fun showDeletePasswordAlert(dir: File) {
+    @SuppressLint("InflateParams")
+    fun showDeletePasswordAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.delete_password_custom_alert, null)
 
@@ -349,6 +365,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
                     true -> {
                         passError.visibility = GONE
                         dir.clearDirectoryPassword(activity)
+                        vm.refreshFiles()
                         dialog.dismiss()
                     }
                     false -> passError.visibility = VISIBLE
@@ -360,6 +377,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
+    @SuppressLint("InflateParams")
     fun showChangeDirectoryColorAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.change_folder_color_custom_alert, null)
@@ -377,7 +395,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.setOnShowListener {
             setupColorChangeListeners(customView, dir, dialog)
         }
-
         dialog.setOnDismissListener {
             vm.refreshFiles()
         }
@@ -404,7 +421,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
             dir.setDirectoryColor(activity, getViewColor(it))
             dialog.dismiss()
         }
-        customView.findViewById<View>(R.id.colorTeal).setOnClickListener{
+        customView.findViewById<View>(R.id.colorLightGrey).setOnClickListener{
             dir.setDirectoryColor(activity, getViewColor(it))
             dialog.dismiss()
         }
@@ -417,6 +434,22 @@ open class FileUtil(private val activity: Activity, private val context: Context
             dialog.dismiss()
         }
         customView.findViewById<View>(R.id.colorRed).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorPurpleGrey).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorLightPink).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorLightPinkClay).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorLightYellow).setOnClickListener{
             dir.setDirectoryColor(activity, getViewColor(it))
             dialog.dismiss()
         }

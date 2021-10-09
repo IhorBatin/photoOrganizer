@@ -83,17 +83,15 @@ class BiometricUtil(private val context: Context) {
                     when (type) {
                         PromptType.SETUP -> {
                             dir.setDirectoryBiometricLocked(context, true)
-                            vm.refreshFiles()
                         }
                         PromptType.UNLOCK -> {
                             vm.setRootDir(dir)
-                            vm.refreshFiles()
                         }
                         PromptType.DELETE -> {
                             dir.clearDirectoryBiometricLock(context)
-                            vm.refreshFiles()
                         }
                     }
+                    vm.refreshFiles()
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     if (errorCode == BiometricPrompt.ERROR_LOCKOUT || errorCode == BiometricPrompt.ERROR_LOCKOUT_PERMANENT) {
@@ -109,21 +107,21 @@ class BiometricUtil(private val context: Context) {
         return when (type) {
             PromptType.SETUP -> {
                 PromptInfo.Builder()
-                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setTitle(context.getString(R.string.biometric_prompt_confirm_title))
                     .setSubtitle(context.getString(R.string.biometric_setup_prompt_sub_title))
                     .setNegativeButtonText(context.getString(R.string.cancel_text))
                     .build()
             }
             PromptType.UNLOCK -> {
                 PromptInfo.Builder()
-                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setTitle(context.getString(R.string.biometric_prompt_unlock_title))
                     .setSubtitle(context.getString(R.string.biometric_unlock_prompt_sub_title))
                     .setNegativeButtonText(context.getString(R.string.cancel_text))
                     .build()
             }
             PromptType.DELETE -> {
                 PromptInfo.Builder()
-                    .setTitle(context.getString(R.string.biometric_prompt_title))
+                    .setTitle(context.getString(R.string.biometric_prompt_disable_title))
                     .setSubtitle(context.getString(R.string.biometric_delete_prompt_sub_title))
                     .setNegativeButtonText(context.getString(R.string.cancel_text))
                     .build()

@@ -67,6 +67,7 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
             else {
                 itemView.findViewById<TextView>(R.id.tvDirTitle).visibility = GONE
                 itemView.findViewById<ImageView>(R.id.ivFileLockedIcon).visibility = GONE
+                image.setColorFilter(Color.TRANSPARENT)
                 image.setViewImage(file)
             }
         }

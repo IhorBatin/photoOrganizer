@@ -1,5 +1,6 @@
 package com.example.photoorganizer.view
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
@@ -32,25 +33,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var customImageAdapter: CustomImageAdapter
 
     private lateinit var rootDir: File
-    private var spanCount = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bundledMainActivity = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bundledMainActivity.root)
-        supportActionBar?.title = getString(R.string.home_text)
 
         Timber.plant(Timber.DebugTree())
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
 
         fileUtil = FileUtil(this, applicationContext)
         biometricUtil = BiometricUtil(this)
-
         rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-
         imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(ImagesViewModel::class.java)
-        imagesViewModel.setRootDir(rootDir)
-        //Timber.tag(DEBUG_TAG).d("Root = ${rootDir.path}")
+
+        // Prevents returning to root dir on device rotation
+        if (imagesViewModel.getCurrentRoot() == null) { imagesViewModel.setRootDir(rootDir) }
 
         setupObservers()
         setupRecyclerView()
@@ -81,6 +79,10 @@ class MainActivity : AppCompatActivity() {
                 handleCreateNewFolderClick()
                 true
             }
+            R.id.miChangeSpan -> {
+                handleChangeSpanClick()
+                true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
     }
@@ -97,18 +99,8 @@ class MainActivity : AppCompatActivity() {
         fileUtil.showNewFolderAlert(imagesViewModel, imagesViewModel.getCurrentRoot())
     }
 
-    override fun onStart() {
-        super.onStart()
-        //imagesViewModel.getFilesByDate(root)
-
-        val files =  imagesViewModel.filesListLiveData.value
-        files?.forEach { file ->
-            //Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
-            //Timber.tag(DEBUG_TAG).d(" \\_canRead= ${file.canRead()} | freeSpace= ${file.freeSpace}")
-            //file.delete()
-
-            //fileUtil.setImageFromPath(file.absolutePath, bundledMainActivity.ivTestImage)
-        }
+    private fun handleChangeSpanClick() {
+        imagesViewModel.setSpan()
     }
 
     override fun onBackPressed() {
@@ -126,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setupObservers() {
         imagesViewModel.filesListLiveData.observe(this , { imagesList ->
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
@@ -135,13 +128,17 @@ class MainActivity : AppCompatActivity() {
         imagesViewModel.rootDirLiveData.observe(this, {
             supportActionBar?.title = it.name
         })
+
+        imagesViewModel.spanCountLiveData.observe(this, {
+            setupRecyclerView()
+        })
     }
 
     private fun setupRecyclerView() {
         // Setting RV
         recyclerView = bundledMainActivity.rvImagesRecycler.apply {
             customImageAdapter = CustomImageAdapter(imagesViewModel)
-            layoutManager = GridLayoutManager(context, spanCount)
+            layoutManager = GridLayoutManager(context, imagesViewModel.getSpan())
             adapter = customImageAdapter
             itemAnimator = DefaultItemAnimator()
         }
@@ -219,8 +216,13 @@ class MainActivity : AppCompatActivity() {
         toggleDirectoryLongClickOptions(true)
 
         bundledMainActivity.ivDeleteDirectory.setOnClickListener {
-            fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir)
-            toggleDirectoryLongClickOptions(false)
+            when (dir.isDirectoryLocked(this)) {
+                true -> fileUtil.showCantDeleteDirectoryAlert()
+                else -> {
+                    fileUtil.showDeleteDirectoryAlert(imagesViewModel, dir)
+                    toggleDirectoryLongClickOptions(false)
+                }
+            }
         }
 
         bundledMainActivity.ivChangeDirColor.setOnClickListener {
@@ -230,7 +232,7 @@ class MainActivity : AppCompatActivity() {
 
         bundledMainActivity.ivLockDirectory.setOnClickListener {
             if (dir.isDirectoryPwdLocked(this))
-                fileUtil.showDeletePasswordAlert(dir)
+                fileUtil.showDeletePasswordAlert(imagesViewModel, dir)
             if (dir.isDirectoryBiometricLocked(this))
                 biometricUtil.showBiometricPrompt(imagesViewModel, dir, PromptType.DELETE)
             else if (!dir.isDirectoryLocked(this))

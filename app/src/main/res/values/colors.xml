@@ -4,6 +4,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="light_grey">#CCD6D8</color>
+    <color name="light_purple_grey">#C7D0F2</color>
+    <color name="light_pink">#E8BFED</color>
+    <color name="light_pink_clay">#DEA9A4</color>
+    <color name="light_yellow">#F0E2C9</color>
+
     <color name="red_50">#fde0dc</color>
     <color name="red_100">#f9bdbb</color>
     <color name="red_200">#f69988</color>

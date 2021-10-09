@@ -6,9 +6,7 @@ package com.example.photoorganizer
 // TODO: Add Animation to bottom menu
 
 /** Fixes and Bugs */
-// TODO: Clean nup logic code in activity and view model
-// TODO: Fix when screen rotated returns back to home directory
-// TODO: Fix bottom menu icons to be bigger, also add sub-names
+// TODO: General UI tweaks
 
 /** Future Plans/Features */
 // TODO: Add zoom in/out on fullscreen picture (https://stackoverflow.com/questions/6650398/android-imageview-zoom-in-and-zoom-out)
