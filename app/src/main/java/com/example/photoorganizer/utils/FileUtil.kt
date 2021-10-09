@@ -393,7 +393,6 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.setOnShowListener {
             setupColorChangeListeners(customView, dir, dialog)
         }
-
         dialog.setOnDismissListener {
             vm.refreshFiles()
         }
