@@ -9,6 +9,11 @@ class ImagesViewModel : ViewModel() {
     val filesListLiveData: MutableLiveData<Array<out File>> = MutableLiveData()
     val imagesListLiveData: MutableLiveData<Array<out File>> = MutableLiveData()
     val rootDirLiveData: MutableLiveData<File> = MutableLiveData()
+    val spanCountLiveData: MutableLiveData<Int> = MutableLiveData()
+
+    init {
+        spanCountLiveData.value = getSpan()
+    }
 
     private fun updateFiles(directory: File?) {
         filesListLiveData.value = ImagesRepository.getFilesListDirectoriesFirst(ImagesRepository.fetchAllFilesByDate(directory))
@@ -40,5 +45,17 @@ class ImagesViewModel : ViewModel() {
             instance ?: synchronized(ImagesViewModel::class.java){
                 instance ?: ImagesViewModel().also { instance = it }
             }
+    }
+
+    fun getSpan() : Int {
+        return when (spanCountLiveData.value == null) {
+            true -> 3
+            false -> spanCountLiveData.value!!
+        }
+    }
+
+    fun setSpan() {
+        if (getSpan() < 5) spanCountLiveData.postValue(getSpan() + 1)
+        else spanCountLiveData.postValue( 2)
     }
 }

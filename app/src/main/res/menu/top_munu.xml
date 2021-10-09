@@ -20,4 +20,10 @@
         android:icon="@drawable/ic_folder_add"
         app:showAsAction="always"
         tools:ignore="MenuTitle" />
+
+    <item
+        android:id="@+id/miChangeSpan"
+        android:icon="@drawable/ic_view_module"
+        app:showAsAction="always"
+        tools:ignore="MenuTitle" />
 </menu>

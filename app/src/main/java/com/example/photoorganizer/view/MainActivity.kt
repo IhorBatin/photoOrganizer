@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var customImageAdapter: CustomImageAdapter
 
     private lateinit var rootDir: File
-    private var spanCount = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +78,10 @@ class MainActivity : AppCompatActivity() {
                 handleCreateNewFolderClick()
                 true
             }
+            R.id.miChangeSpan -> {
+                handleChangeSpanClick()
+                true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
     }
@@ -93,6 +96,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleCreateNewFolderClick() {
         fileUtil.showNewFolderAlert(imagesViewModel, imagesViewModel.getCurrentRoot())
+    }
+
+    private fun handleChangeSpanClick() {
+        imagesViewModel.setSpan()
     }
 
     override fun onStart() {
@@ -133,13 +140,17 @@ class MainActivity : AppCompatActivity() {
         imagesViewModel.rootDirLiveData.observe(this, {
             supportActionBar?.title = it.name
         })
+
+        imagesViewModel.spanCountLiveData.observe(this, {
+            setupRecyclerView()
+        })
     }
 
     private fun setupRecyclerView() {
         // Setting RV
         recyclerView = bundledMainActivity.rvImagesRecycler.apply {
             customImageAdapter = CustomImageAdapter(imagesViewModel)
-            layoutManager = GridLayoutManager(context, spanCount)
+            layoutManager = GridLayoutManager(context, imagesViewModel.getSpan())
             adapter = customImageAdapter
             itemAnimator = DefaultItemAnimator()
         }

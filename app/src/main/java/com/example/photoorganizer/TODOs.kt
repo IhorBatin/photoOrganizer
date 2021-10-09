@@ -6,8 +6,6 @@ package com.example.photoorganizer
 // TODO: Add Animation to bottom menu
 
 /** Fixes and Bugs */
-// TODO: Fix when screen rotated returns back to home directory (save state)
-// TODO: Fix bottom menu icons, to be bigger, also add sub-names
 // TODO: General UI tweaks
 
 /** Future Plans/Features */
