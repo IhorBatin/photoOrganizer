@@ -420,7 +420,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
             dir.setDirectoryColor(activity, getViewColor(it))
             dialog.dismiss()
         }
-        customView.findViewById<View>(R.id.colorTeal).setOnClickListener{
+        customView.findViewById<View>(R.id.colorLightGrey).setOnClickListener{
             dir.setDirectoryColor(activity, getViewColor(it))
             dialog.dismiss()
         }
@@ -433,6 +433,22 @@ open class FileUtil(private val activity: Activity, private val context: Context
             dialog.dismiss()
         }
         customView.findViewById<View>(R.id.colorRed).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorPurpleGrey).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorLightPink).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorLightPinkClay).setOnClickListener{
+            dir.setDirectoryColor(activity, getViewColor(it))
+            dialog.dismiss()
+        }
+        customView.findViewById<View>(R.id.colorLightYellow).setOnClickListener{
             dir.setDirectoryColor(activity, getViewColor(it))
             dialog.dismiss()
         }

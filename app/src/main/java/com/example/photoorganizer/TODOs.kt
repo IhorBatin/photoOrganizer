@@ -7,8 +7,8 @@ package com.example.photoorganizer
 
 /** Fixes and Bugs */
 // TODO: Clean nup logic code in activity and view model
-// TODO: Fix when screen rotated returns back to home directory
-// TODO: Fix bottom menu icons to be bigger, also add sub-names
+// TODO: Fix when screen rotated returns back to home directory (save state)
+// TODO: Fix bottom menu icons, to be bigger, also add sub-names
 // TODO: General UI tweaks
 
 /** Future Plans/Features */

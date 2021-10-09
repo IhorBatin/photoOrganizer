@@ -52,9 +52,9 @@
         app:layout_constraintLeft_toRightOf="@id/colorOrange"/>
     
     <View
-        android:id="@+id/colorTeal"
+        android:id="@+id/colorLightGrey"
         style="@style/ColorCellStyle"
-        android:background="@color/teal_500"
+        android:background="@color/light_grey"
         app:layout_constraintTop_toBottomOf="@id/colorDefault"
         app:layout_constraintRight_toLeftOf="@id/colorBrown"
         app:layout_constraintLeft_toLeftOf="parent"/>
@@ -65,7 +65,7 @@
         android:background="@color/brown_500"
         app:layout_constraintTop_toBottomOf="@id/colorDefault"
         app:layout_constraintRight_toLeftOf="@id/colorBlue"
-        app:layout_constraintLeft_toRightOf="@id/colorTeal"/>
+        app:layout_constraintLeft_toRightOf="@id/colorLightGrey"/>
 
     <View
         android:id="@+id/colorBlue"
@@ -82,5 +82,37 @@
         app:layout_constraintTop_toBottomOf="@id/colorDefault"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toRightOf="@id/colorBlue"/>
+
+    <View
+        android:id="@+id/colorPurpleGrey"
+        style="@style/ColorCellStyle"
+        android:background="@color/light_purple_grey"
+        app:layout_constraintTop_toBottomOf="@id/colorLightGrey"
+        app:layout_constraintRight_toLeftOf="@id/colorLightPink"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <View
+        android:id="@+id/colorLightPink"
+        style="@style/ColorCellStyle"
+        android:background="@color/light_pink"
+        app:layout_constraintTop_toBottomOf="@id/colorLightGrey"
+        app:layout_constraintRight_toLeftOf="@id/colorLightPinkClay"
+        app:layout_constraintLeft_toRightOf="@id/colorPurpleGrey"/>
+
+    <View
+        android:id="@+id/colorLightPinkClay"
+        style="@style/ColorCellStyle"
+        android:background="@color/light_pink_clay"
+        app:layout_constraintTop_toBottomOf="@id/colorLightGrey"
+        app:layout_constraintRight_toLeftOf="@id/colorLightYellow"
+        app:layout_constraintLeft_toRightOf="@id/colorLightPink"/>
+
+    <View
+        android:id="@+id/colorLightYellow"
+        style="@style/ColorCellStyle"
+        android:background="@color/light_yellow"
+        app:layout_constraintTop_toBottomOf="@id/colorLightGrey"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/colorLightPinkClay"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
