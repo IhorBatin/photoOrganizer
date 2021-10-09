@@ -1,5 +1,6 @@
 package com.example.photoorganizer.view
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
@@ -102,20 +103,6 @@ class MainActivity : AppCompatActivity() {
         imagesViewModel.setSpan()
     }
 
-    override fun onStart() {
-        super.onStart()
-        //imagesViewModel.getFilesByDate(root)
-
-        val files =  imagesViewModel.filesListLiveData.value
-        files?.forEach { file ->
-            //Timber.tag(DEBUG_TAG).d("File: ${file.name} isFile= ${file.isFile}")
-            //Timber.tag(DEBUG_TAG).d(" \\_canRead= ${file.canRead()} | freeSpace= ${file.freeSpace}")
-            //file.delete()
-
-            //fileUtil.setImageFromPath(file.absolutePath, bundledMainActivity.ivTestImage)
-        }
-    }
-
     override fun onBackPressed() {
         if (bundledMainActivity.clImageOptions.isShown ||
                 bundledMainActivity.clDirectoryOptions.isShown) {
@@ -131,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setupObservers() {
         imagesViewModel.filesListLiveData.observe(this , { imagesList ->
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")

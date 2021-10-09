@@ -339,6 +339,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
+    @SuppressLint("InflateParams")
     fun showDeletePasswordAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.delete_password_custom_alert, null)
@@ -376,6 +377,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
         dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
     }
 
+    @SuppressLint("InflateParams")
     fun showChangeDirectoryColorAlert(vm: ImagesViewModel, dir: File) {
         val layoutInflater = LayoutInflater.from(context)
         val customView: View = layoutInflater.inflate(R.layout.change_folder_color_custom_alert, null)
