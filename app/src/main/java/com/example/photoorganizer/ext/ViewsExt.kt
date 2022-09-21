@@ -36,3 +36,10 @@ fun ImageView.setViewImage(file: File) {
         .into(this)
 }
 
+fun ImageView.setFullScreenViewImage(file: File) {
+    Glide
+        .with(this)
+        .load(file)
+        .into(this)
+}
+
