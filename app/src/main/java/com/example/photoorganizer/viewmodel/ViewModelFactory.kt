@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 
 class ViewModelFactory : ViewModelProvider.NewInstanceFactory() {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>) =
+    override fun <T : ViewModel> create(modelClass: Class<T>): T =
         with(modelClass){
             when {
                 isAssignableFrom(ImagesViewModel::class.java) -> ImagesViewModel.getInstance()

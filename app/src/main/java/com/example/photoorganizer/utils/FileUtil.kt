@@ -14,7 +14,9 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.widget.*
-import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import com.example.photoorganizer.R
@@ -70,7 +72,7 @@ open class FileUtil(private val activity: Activity, private val context: Context
     }
 
     @SuppressLint("QueryPermissionsNeeded")
-    fun dispatchTakePictureIntent(dir: File?) {
+    fun dispatchTakePictureIntent(dir: File?, launcher: ActivityResultLauncher<Intent>) {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(context.packageManager)?.also {
@@ -93,22 +95,14 @@ open class FileUtil(private val activity: Activity, private val context: Context
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     //takePictureIntent.putExtra("android.intent.extras.CAMERA_FACING", 2) does not seem to work,
                     // the last camera that was open in default app will be open here too until change in default app
-                    startActivityForResult(activity, takePictureIntent, REQUEST_IMAGE_CAPTURE, null)
+                    launcher.launch(takePictureIntent)
                 }
             }
         }
     }
 
-    fun dispatchImportImagesIntent() {
-        Intent(
-            //Intent.ACTION_GET_CONTENT,
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.INTERNAL_CONTENT_URI
-        ).also { importImagesIntent ->
-            importImagesIntent.type = "image/*"
-            importImagesIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            startActivityForResult(activity, importImagesIntent, REQUEST_IMAGE_IMPORT, null)
-        }
+    fun dispatchImportImagesIntent(launcher: ActivityResultLauncher<PickVisualMediaRequest>) {
+        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
     fun dispatchShareImageIntent(image: File) {

@@ -8,7 +8,12 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
@@ -34,10 +39,40 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var rootDir: File
 
+    private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_CANCELED) {
+            File(fileUtil.currentPhotoPath).delete()
+        } else {
+            imagesViewModel.refreshFiles()
+        }
+    }
+
+    private val pickMultipleMedia = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(15)) { uris ->
+        if (uris.isNotEmpty()) {
+            for (uri in uris) {
+                val photoFile: File? = try {
+                    fileUtil.createImageFile(imagesViewModel.getCurrentRoot())
+                } catch (ex: IOException) {
+                    null
+                }
+                val byteArray = fileUtil.readBytesFromUri(uri)
+                byteArray?.let { photoFile?.writeBytes(it) }
+            }
+            imagesViewModel.refreshFiles()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         bundledMainActivity = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bundledMainActivity.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(bundledMainActivity.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         Timber.plant(Timber.DebugTree())
         Timber.tag(DEBUG_TAG).d("* * * Started App * * *")
@@ -45,13 +80,35 @@ class MainActivity : AppCompatActivity() {
         fileUtil = FileUtil(this, applicationContext)
         biometricUtil = BiometricUtil(this)
         rootDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-        imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(ImagesViewModel::class.java)
+        imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance())[ImagesViewModel::class.java]
 
         // Prevents returning to root dir on device rotation
         if (imagesViewModel.getCurrentRoot() == null) { imagesViewModel.setRootDir(rootDir) }
 
         setupObservers()
         setupRecyclerView()
+        setupOnBackPressed()
+    }
+
+    private fun setupOnBackPressed() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (bundledMainActivity.clImageOptions.isShown ||
+                    bundledMainActivity.clDirectoryOptions.isShown) {
+                    toggleImageLongClickOptions(false)
+                    toggleDirectoryLongClickOptions(false)
+                    return
+                }
+                if (imagesViewModel.getCurrentRoot()?.name == Environment.DIRECTORY_PICTURES) {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+                else {
+                    imagesViewModel.setRootDir(imagesViewModel.getCurrentRoot()?.parentFile)
+                }
+            }
+        })
     }
 
     override fun onResume() {
@@ -83,16 +140,16 @@ class MainActivity : AppCompatActivity() {
                 handleChangeSpanClick()
                 true
             }
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun handleTakePhotoClick() {
-        fileUtil.dispatchTakePictureIntent(imagesViewModel.getCurrentRoot())
+        fileUtil.dispatchTakePictureIntent(imagesViewModel.getCurrentRoot(), takePictureLauncher)
     }
 
     private fun handleImportPhotoClick() {
-        fileUtil.dispatchImportImagesIntent()
+        fileUtil.dispatchImportImagesIntent(pickMultipleMedia)
     }
 
     private fun handleCreateNewFolderClick() {
@@ -103,35 +160,20 @@ class MainActivity : AppCompatActivity() {
         imagesViewModel.setSpan()
     }
 
-    override fun onBackPressed() {
-        if (bundledMainActivity.clImageOptions.isShown ||
-                bundledMainActivity.clDirectoryOptions.isShown) {
-            toggleImageLongClickOptions(false)
-            toggleDirectoryLongClickOptions(false)
-            return
-        }
-        if (imagesViewModel.getCurrentRoot()?.name == Environment.DIRECTORY_PICTURES) {
-            super.onBackPressed()
-        }
-        else {
-            imagesViewModel.setRootDir(imagesViewModel.getCurrentRoot()?.parentFile)
-        }
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     private fun setupObservers() {
-        imagesViewModel.filesListLiveData.observe(this , { imagesList ->
+        imagesViewModel.filesListLiveData.observe(this) { imagesList ->
             Timber.tag(DEBUG_TAG).d("Total Files: ${imagesList.size}")
             customImageAdapter.notifyDataSetChanged()
-        })
+        }
 
-        imagesViewModel.rootDirLiveData.observe(this, {
+        imagesViewModel.rootDirLiveData.observe(this) {
             supportActionBar?.title = it.name
-        })
+        }
 
-        imagesViewModel.spanCountLiveData.observe(this, {
+        imagesViewModel.spanCountLiveData.observe(this) {
             setupRecyclerView()
-        })
+        }
     }
 
     private fun setupRecyclerView() {
@@ -248,45 +290,4 @@ class MainActivity : AppCompatActivity() {
     private fun toggleDirectoryLongClickOptions(showOptions: Boolean) {
         bundledMainActivity.clDirectoryOptions.visibility = if (showOptions) View.VISIBLE else View.GONE
     }
-
-    /**
-     * Returned image should be coming here if takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-     * is disabled in Util class
-     */
-    @SuppressWarnings("deprecation")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Timber.tag(DEBUG_TAG).d("onActivityResult()")
-
-        /** Handling return from image capture activity */
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_CANCELED) {
-            // When image is not taken we simply delete empty file that was created for it
-            //Timber.tag(DEBUG_TAG).d("image was NOT taken ... deleting empty file")
-            File(fileUtil.currentPhotoPath).delete()
-        }
-        /** Handling return from image import activity */
-        if (requestCode == REQUEST_IMAGE_IMPORT && resultCode == RESULT_OK) {
-            Timber.tag(DEBUG_TAG).d("Image import selected ....")
-            if (data != null && data.clipData != null) {
-                val numOfImports = data.clipData?.itemCount ?: 0
-                Timber.tag(DEBUG_TAG).d("Imported $numOfImports images")
-
-                for (i in 0 until numOfImports) {
-                    val currentImageUri = data.clipData?.getItemAt(i)?.uri
-                    Timber.tag(DEBUG_TAG).d("Import #$i -> $currentImageUri")
-                    val photoFile: File? = try {
-                        fileUtil.createImageFile(imagesViewModel.getCurrentRoot())
-                    } catch (ex: IOException) {
-                        Timber.tag(DEBUG_TAG).d("Error while creating file...")
-                        null
-                    }
-                    val byteArray = currentImageUri?.let {
-                        fileUtil.readBytesFromUri(it)
-                    }
-                    byteArray?.let { photoFile?.writeBytes(it) }
-                }
-            }
-        }
-    }
-
 }

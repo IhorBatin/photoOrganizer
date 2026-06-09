@@ -1,6 +1,9 @@
 package com.example.photoorganizer.view
 
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
@@ -23,9 +26,16 @@ class ScreenSlidePagerActivity : FragmentActivity() {
     private var openImageAtPosition: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen_slide)
-        imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(ImagesViewModel::class.java)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.clScreenSlideRoot)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        imagesViewModel = ViewModelProvider(this, ViewModelFactory.getInstance())[ImagesViewModel::class.java]
         imagesViewModel.getImagesForViewPager(imagesViewModel.rootDirLiveData.value)
         fileUtil = FileUtil(this, applicationContext)
         openImageAtPosition = intent.getIntExtra(OPEN_AT_POS, 0)
