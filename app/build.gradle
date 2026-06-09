@@ -2,16 +2,18 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'com.google.gms.google-services'
 }
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.2"
+    namespace 'com.example.photoorganizer'
+    compileSdk 31
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.example.photoorganizer"
-        minSdkVersion 24
-        targetSdkVersion 31
+        minSdk 24
+        targetSdk 31
         versionCode 1
         versionName "1.0.4"
 
@@ -32,11 +34,9 @@ android {
         jvmTarget = '1.8'
     }
     buildFeatures {
-        dataBinding true
+        dataBinding = true
     }
 }
-
-apply plugin: 'com.google.gms.google-services'
 
 dependencies {
 
