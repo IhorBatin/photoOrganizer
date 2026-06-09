@@ -1,4 +1,4 @@
-# Photo Organizer
+# Photo Organizer - [WIP]
 
 An Android application for managing and organizing photos with a options for privacy and security.
 
@@ -8,7 +8,7 @@ An Android application for managing and organizing photos with a options for pri
 - **Folder Protection**: Secure specific folders using **Biometric Authentication** (Fingerprint/Face) or **Passwords**.
 - **Privacy Focused**: Uses the modern Android Photo Picker and Scoped Storage to minimize permission requirements.
 
-## 🛠 Tech Stack [WIP]
+## 🛠 Tech Stack
 
 - **Language**: [Kotlin](https://kotlinlang.org/) (2.2.10)
 - **Build System**: [Gradle](https://gradle.org/) (9.5.1) with Version Catalog (TOML)
@@ -19,7 +19,6 @@ An Android application for managing and organizing photos with a options for pri
   - [Glide](https://github.com/bumptech/glide): Image loading and caching
   - [Timber](https://github.com/JakeWharton/timber): Logging
   - [Biometric](https://developer.android.com/training/sign-in/biometric-auth): Security integration
-  - [Firebase](https://firebase.google.com/): Cloud messaging and analytics
 
 ## 📦 Project Setup
 
