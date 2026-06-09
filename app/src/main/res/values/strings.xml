@@ -15,7 +15,7 @@
     <string name="home_text">Home</string>
     <string name="create_password_title">Create New Password</string>
     <string name="biometrics_not_setup_title">Biometrics is not setup</string>
-    <string name="biometrics_not_setup_msg">Please proceed to setting in order to sutup biometric authentication</string>
+    <string name="biometrics_not_setup_msg">Please proceed to settings in order to setup biometric authentication</string>
     <string name="proceed_text">Proceed</string>
     <string name="biometric_setup_prompt_sub_title">Use Biometrics to set lock on this folder</string>
     <string name="biometric_unlock_prompt_sub_title">Use Biometrics to unlock this folder</string>

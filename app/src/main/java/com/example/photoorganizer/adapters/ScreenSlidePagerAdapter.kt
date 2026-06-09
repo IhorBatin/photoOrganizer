@@ -33,11 +33,11 @@ class ScreenSlidePagerAdapter(private val viewModel: ImagesViewModel) : Recycler
 
         init {
             imgShare.setOnClickListener {
-                onShareClick?.invoke(adapterPosition)
+                onShareClick?.invoke(bindingAdapterPosition)
             }
 
             imgDelete.setOnClickListener {
-                onDeleteClick?.invoke(adapterPosition)
+                onDeleteClick?.invoke(bindingAdapterPosition)
             }
         }
 

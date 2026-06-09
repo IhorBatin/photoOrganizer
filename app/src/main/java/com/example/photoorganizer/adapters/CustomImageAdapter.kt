@@ -42,10 +42,10 @@ class CustomImageAdapter(private val viewModel: ImagesViewModel) : RecyclerView.
 
         init {
             image.setOnClickListener {
-                onImageClick?.invoke(adapterPosition)
+                onImageClick?.invoke(bindingAdapterPosition)
             }
             image.setOnLongClickListener {
-                onImageLongClick?.invoke(adapterPosition)
+                onImageLongClick?.invoke(bindingAdapterPosition)
 
                 return@setOnLongClickListener true // Have to return value
             }
